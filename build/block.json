@@ -19,6 +19,27 @@
   "editorStyle": "file:./index.css",
   "style": "file:./style-index.css",
   "attributes": {
-    "posts_per_page": {}
+    "posts_per_page": {
+      "type": "number",
+      "default": 3
+    },
+    "post_type": {
+      "type": "string",
+      "default": "post"
+    },
+    "taxonomy": {
+      "type": "array"
+    },
+    "terms": {
+      "type": "array"
+    },
+    "order": {
+      "type": "string",
+      "default": "desc"
+    },
+    "orderby": {
+      "type": "string",
+      "default": "date"
+    }
   }
 }

@@ -1,41 +1,81 @@
-/**
- * Retrieves the translation of text.
- *
- * @see https://developer.wordpress.org/block-editor/packages/packages-i18n/
- */
 import { __ } from '@wordpress/i18n';
-
-/**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/packages/packages-block-editor/#useBlockProps
- */
-import { useBlockProps } from '@wordpress/block-editor';
-
-/**
- * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
- * Those files can contain any CSS code that gets applied to the editor.
- *
- * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
- */
+import { 
+  useBlockProps,
+  InspectorControls
+} from '@wordpress/block-editor';
+import { useSelect } from '@wordpress/data';
+import {
+  Spinner,
+  PanelBody,
+  ToggleControl,
+  QueryControls,
+} from "@wordpress/components";
+import { RawHTML } from "@wordpress/element";
 import './editor.scss';
-
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/developers/block-api/block-edit-save/#edit
- *
- * @return {WPElement} Element to render.
- */
-export default function Edit() {
+export default function Edit({ attributes, setAttributes }) {
+  const {
+    posts_per_page,
+    post_type,
+    taxonomy,
+    terms,
+    order,
+    orderby
+  } = attributes;
+  const posts = useSelect(
+    ( select ) => {
+      return select('core').getEntityRecords('postType', post_type, {
+        per_page: posts_per_page,
+        _embed: true,
+        order: order,
+        orderby: orderby,
+        taxonomy: terms
+      } );
+    }, [posts_per_page, order, orderby, taxonomy]
+  );
+  const placeholders = [];
+  for ( let i = 0; i < posts_per_page; i++ ) {
+    placeholders.push(i);
+  }
 	return (
-		<p { ...useBlockProps() }>
-			{ __(
-				'Posts Carousel – hello from the editor!',
-				'cth-post-carousel'
-			) }
-		</p>
+		<>
+      <InspectorControls>
+        <PanelBody title={ __( "Query Settings", "cth" ) }>
+
+        </PanelBody>
+      </InspectorControls>
+			<div { ...useBlockProps() }>
+				<ul className="cth-post-carousel-list">
+          {!posts && 
+            <p class="cth-post-carousel-placeholder">
+              Posts Carousel Block
+            </p>
+          }
+          {!posts &&
+            placeholders.map( ( post ) => {
+              return(
+                <li key={post} className="cth-posts-carousel-placeholder-item">
+                  <Spinner />
+                </li>
+              );
+            } )
+          }
+          {posts &&
+            posts.map( ( post ) => {
+              return(
+                <li key={post.id} class="cth-post-carousel-list-item">
+                  { post.title.rendered ? (
+                    <RawHTML>
+                      { post.title.rendered }
+                    </RawHTML>
+                  ) : (
+                    __( "No Title", "cth" )
+                  ) }
+                </li>
+              );
+            } )
+          }
+				</ul>	
+			</div>
+		</>
 	);
 }
