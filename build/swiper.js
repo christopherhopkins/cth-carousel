@@ -2,18 +2,6 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./node_modules/swiper/swiper.min.css":
-/*!********************************************!*\
-  !*** ./node_modules/swiper/swiper.min.css ***!
-  \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
-
-/***/ }),
-
 /***/ "./node_modules/dom7/dom7.esm.js":
 /*!***************************************!*\
   !*** ./node_modules/dom7/dom7.esm.js ***!
@@ -13101,13 +13089,61 @@ var __webpack_exports__ = {};
   \***********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var swiper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! swiper */ "./node_modules/swiper/swiper.esm.js");
-/* harmony import */ var swiper_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! swiper/css */ "./node_modules/swiper/swiper.min.css");
+// Import all possible module options
 
+const cthBlocksCarousels = document.querySelectorAll(".wp-block-cth-blocks-cth-post-carousel");
 
-const swiper = new swiper__WEBPACK_IMPORTED_MODULE_0__["default"]('.swiper', {
-  init: true,
-  slidesPerView: 1
-});
+if (cthBlocksCarousels) {
+  cthBlocksCarousels.forEach((element, index) => {
+    const carousel = element;
+    const swiperEl = carousel.querySelector(".swiper");
+    const blockID = swiperEl.getAttribute("data-id");
+    const slidesPerView = swiperEl.getAttribute('data-slides-per-view');
+    const loop = swiperEl.getAttribute('data-loop'); // Set up interactive elements
+
+    const nextEl = `.swiper-button-next[data-id="${blockID}"]`;
+    const prevEl = `.swiper-button-prev[data-id="${blockID}"]`;
+    const scrollbarEl = `.swiper-scrollbar[data-id="${blockID}"]`;
+    const paginationEl = `.swiper-pagination[data-id="${blockID}"]`; // set up default modules always included
+
+    let initModules = [swiper__WEBPACK_IMPORTED_MODULE_0__.A11y];
+
+    if (swiperEl.getAttribute("data-pagination")) {
+      initModules.push(swiper__WEBPACK_IMPORTED_MODULE_0__.Pagination);
+    }
+
+    if (swiperEl.getAttribute("data-scrollbar")) {
+      initModules.push(swiper__WEBPACK_IMPORTED_MODULE_0__.Scrollbar);
+    }
+
+    if (swiperEl.getAttribute("data-navigation")) {
+      initModules.push(swiper__WEBPACK_IMPORTED_MODULE_0__.Navigation);
+    }
+
+    const swiper = new swiper__WEBPACK_IMPORTED_MODULE_0__.Swiper(swiperEl, {
+      modules: initModules,
+      slidesPerView: slidesPerView,
+      // autoHeight: true,
+      a11y: {
+        // https://swiperjs.com/swiper-api#accessibility-a11y
+        enabled: true
+      },
+      navigation: {
+        nextEl: nextEl,
+        prevEl: prevEl
+      },
+      scrollbar: {
+        el: scrollbarEl,
+        draggable: true
+      },
+      pagination: {
+        el: paginationEl,
+        type: "bullets"
+      }
+    });
+    console.log(swiper);
+  });
+}
 })();
 
 /******/ })()

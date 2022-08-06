@@ -27,3 +27,8 @@ function cth_blocks_cth_post_carousel_block_init() {
 	) );
 }
 add_action( 'init', 'cth_blocks_cth_post_carousel_block_init' );
+
+function cth_blocks_cth_post_carousel_scripts() {
+	wp_enqueue_script( 'cth-swiper', plugin_dir_url( __FILE__ ) . '/build/swiper.js', array(), '1.0.0', true );
+}
+add_action( 'wp_enqueue_scripts', 'cth_blocks_cth_post_carousel_scripts' );

@@ -17,6 +17,10 @@
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
 	"attributes": {
+		"blockID": {
+			"type": "string",
+			"default": "0"
+		},
 		"posts_per_page": {
 			"type": "number",
 			"default": 3
@@ -38,6 +42,26 @@
 		"orderby": {
 			"type": "string",
 			"default": "date"
+		},
+		"slides_per_view": {
+			"type": "number",
+			"default": 1
+		},
+		"navigation": {
+			"type": "boolean",
+			"default": true
+		},
+		"loop": {
+			"type": "boolean",
+			"default": false
+		},
+		"dots": {
+			"type": "boolean",
+			"default": false
+		},
+		"scrollbar": {
+			"type": "boolean",
+			"default": false
 		}
 	}
 }

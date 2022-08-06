@@ -24,9 +24,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! classnames */ "./node_modules/classnames/index.js");
 /* harmony import */ var classnames__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(classnames__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./editor.scss */ "./src/editor.scss");
-/* harmony import */ var swiper__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! swiper */ "./node_modules/swiper/swiper.esm.js");
-/* harmony import */ var swiper_css__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! swiper/css */ "./node_modules/swiper/swiper.min.css");
+/* harmony import */ var lodash_uniqueId__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lodash/uniqueId */ "./node_modules/lodash/uniqueId.js");
+/* harmony import */ var lodash_uniqueId__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(lodash_uniqueId__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _editor_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./editor.scss */ "./src/editor.scss");
+/* harmony import */ var swiper__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! swiper */ "./node_modules/swiper/swiper.esm.js");
+/* harmony import */ var swiper_react__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! swiper/react */ "./node_modules/swiper/react/swiper-react.js");
+
 
 
 
@@ -47,12 +50,18 @@ function Edit(_ref) {
     setAttributes
   } = _ref;
   const {
+    blockID,
     posts_per_page,
     post_type,
     taxonomy,
     terms,
     order,
-    orderby
+    orderby,
+    slides_per_view,
+    loop,
+    navigation,
+    dots,
+    scrollbar
   } = attributes;
   const posts = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => {
     return select('core').getEntityRecords('postType', post_type, {
@@ -72,6 +81,8 @@ function Edit(_ref) {
    * On Change Functions
   */
 
+  /** Query Settings */
+
 
   const onChangePostsPerPage = number => {
     setAttributes({
@@ -90,21 +101,48 @@ function Edit(_ref) {
       orderby: orderby
     });
   };
+  /** Carousel Settings */
+
+
+  const onChangeSlidesPerView = number => {
+    setAttributes({
+      slides_per_view: number
+    });
+  };
+
+  const onChangeLoop = () => {
+    setAttributes({
+      loop: !loop
+    });
+  };
+
+  const onChangeNavigation = () => {
+    setAttributes({
+      navigation: !navigation
+    });
+  };
+
+  const onChangeScrollbar = () => {
+    setAttributes({
+      scrollbar: !scrollbar
+    });
+  };
+
+  const onChangeDots = () => {
+    setAttributes({
+      dots: !dots
+    });
+  };
+  /**
+   * Ensure unique ID
+  */
+
 
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    const swiper = new swiper__WEBPACK_IMPORTED_MODULE_7__["default"](".swiper", {
-      modules: [swiper__WEBPACK_IMPORTED_MODULE_7__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_7__.Pagination],
-      slidesPerView: 1,
-      navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev"
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        type: "progressbar"
-      }
+    setAttributes({
+      blockID: lodash_uniqueId__WEBPACK_IMPORTED_MODULE_6___default()()
     });
-  }, [posts_per_page, order, orderby, taxonomy]);
+  }, []);
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.InspectorControls, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.PanelBody, {
     title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Query Settings", "cth")
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.QueryControls, {
@@ -114,31 +152,65 @@ function Edit(_ref) {
     onOrderChange: onChangeOrder,
     onOrderByChange: onChangeOrderBy,
     onNumberOfItemsChange: onChangePostsPerPage
-  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)({
-    className: `swiper`
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
-    class: "swiper-button-prev"
-  }, "Previous"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    className: "cth-post-carousel-list swiper-wrapper"
-  }, !posts && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", {
-    class: "cth-post-carousel-placeholder"
-  }, "Posts Carousel Block"), !posts && placeholders.map(post => {
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("li", {
+  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.PanelBody, {
+    title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Carousel Settings", "cth")
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.RangeControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Slides Per View", "cth"),
+    value: slides_per_view,
+    onChange: onChangeSlidesPerView,
+    min: 1,
+    max: posts_per_page
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.__experimentalGrid, {
+    columns: 2,
+    gap: 1
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.ToggleControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Loop", "cth"),
+    help: loop ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Infinite Loop", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Loop", "cth"),
+    checked: loop,
+    onChange: onChangeLoop
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.ToggleControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Arrows", "cth"),
+    help: navigation ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Arrows", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Arrows", "cth"),
+    checked: navigation,
+    onChange: onChangeNavigation
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.ToggleControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Dots", "cth"),
+    help: dots ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Dots", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Dots", "cth"),
+    checked: dots,
+    onChange: onChangeDots
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.ToggleControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Scrollbar", "cth"),
+    help: scrollbar ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Scrollbar", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Scrollbar", "cth"),
+    checked: scrollbar,
+    onChange: onChangeScrollbar
+  })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)(), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.Swiper, {
+    className: "cth-post-carousel-list swiper-wrapper",
+    modules: [swiper__WEBPACK_IMPORTED_MODULE_8__.A11y, swiper__WEBPACK_IMPORTED_MODULE_8__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_8__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_8__.Scrollbar] // onSwiper={(swiper) => console.log(swiper)}
+    // onSlideChange={() => console.log('slide change')}
+    ,
+    slidesPerView: slides_per_view,
+    navigation: navigation ? {
+      clickable: true
+    } : navigation,
+    pagination: dots ? {
+      clickable: true
+    } : dots,
+    scrollbar: scrollbar ? {
+      draggable: true
+    } : scrollbar,
+    loop: loop
+  }, !posts && placeholders.map(post => {
+    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.SwiperSlide, {
       key: post,
       className: "cth-posts-carousel-placeholder-item"
     }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, null));
   }), posts && posts.map(post => {
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-      key: post.id,
-      class: "cth-post-carousel-list-item swiper-slide"
+    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.SwiperSlide, {
+      key: post.id
     }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.CardHeader, null, post.title.rendered ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.__experimentalHeading, {
       size: 3
-    }, post.title.rendered) : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Title", "cth"))));
-  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("button", {
-    class: "swiper-button-next"
-  }, "Next"), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
-    class: "swiper-pagination"
-  })));
+    }, post.title.rendered) : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Title", "cth")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.CardBody, null, post.excerpt.rendered && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.RawHTML, null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)(post.excerpt.rendered, "cth")))));
+  }))));
 }
 
 /***/ }),
@@ -311,15 +383,445 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 /***/ }),
 
-/***/ "./node_modules/swiper/swiper.min.css":
-/*!********************************************!*\
-  !*** ./node_modules/swiper/swiper.min.css ***!
-  \********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ "./node_modules/lodash/_Symbol.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/_Symbol.js ***!
+  \****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
+var root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/** Built-in value references. */
+var Symbol = root.Symbol;
+
+module.exports = Symbol;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arrayMap.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_arrayMap.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.map` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
+ */
+function arrayMap(array, iteratee) {
+  var index = -1,
+      length = array == null ? 0 : array.length,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = iteratee(array[index], index, array);
+  }
+  return result;
+}
+
+module.exports = arrayMap;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseGetTag.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseGetTag.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js"),
+    getRawTag = __webpack_require__(/*! ./_getRawTag */ "./node_modules/lodash/_getRawTag.js"),
+    objectToString = __webpack_require__(/*! ./_objectToString */ "./node_modules/lodash/_objectToString.js");
+
+/** `Object#toString` result references. */
+var nullTag = '[object Null]',
+    undefinedTag = '[object Undefined]';
+
+/** Built-in value references. */
+var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+/**
+ * The base implementation of `getTag` without fallbacks for buggy environments.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
+ */
+function baseGetTag(value) {
+  if (value == null) {
+    return value === undefined ? undefinedTag : nullTag;
+  }
+  return (symToStringTag && symToStringTag in Object(value))
+    ? getRawTag(value)
+    : objectToString(value);
+}
+
+module.exports = baseGetTag;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseToString.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseToString.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js"),
+    arrayMap = __webpack_require__(/*! ./_arrayMap */ "./node_modules/lodash/_arrayMap.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isSymbol = __webpack_require__(/*! ./isSymbol */ "./node_modules/lodash/isSymbol.js");
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isArray(value)) {
+    // Recursively convert values (susceptible to call stack limits).
+    return arrayMap(value, baseToString) + '';
+  }
+  if (isSymbol(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+module.exports = baseToString;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_freeGlobal.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_freeGlobal.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof __webpack_require__.g == 'object' && __webpack_require__.g && __webpack_require__.g.Object === Object && __webpack_require__.g;
+
+module.exports = freeGlobal;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getRawTag.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_getRawTag.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js");
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString = objectProto.toString;
+
+/** Built-in value references. */
+var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+/**
+ * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the raw `toStringTag`.
+ */
+function getRawTag(value) {
+  var isOwn = hasOwnProperty.call(value, symToStringTag),
+      tag = value[symToStringTag];
+
+  try {
+    value[symToStringTag] = undefined;
+    var unmasked = true;
+  } catch (e) {}
+
+  var result = nativeObjectToString.call(value);
+  if (unmasked) {
+    if (isOwn) {
+      value[symToStringTag] = tag;
+    } else {
+      delete value[symToStringTag];
+    }
+  }
+  return result;
+}
+
+module.exports = getRawTag;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_objectToString.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_objectToString.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString = objectProto.toString;
+
+/**
+ * Converts `value` to a string using `Object.prototype.toString`.
+ *
+ * @private
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ */
+function objectToString(value) {
+  return nativeObjectToString.call(value);
+}
+
+module.exports = objectToString;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_root.js":
+/*!**************************************!*\
+  !*** ./node_modules/lodash/_root.js ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var freeGlobal = __webpack_require__(/*! ./_freeGlobal */ "./node_modules/lodash/_freeGlobal.js");
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+module.exports = root;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isArray.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/isArray.js ***!
+  \****************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+module.exports = isArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isObjectLike.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/isObjectLike.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return value != null && typeof value == 'object';
+}
+
+module.exports = isObjectLike;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isSymbol.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isSymbol.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetTag = __webpack_require__(/*! ./_baseGetTag */ "./node_modules/lodash/_baseGetTag.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag);
+}
+
+module.exports = isSymbol;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/toString.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/toString.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseToString = __webpack_require__(/*! ./_baseToString */ "./node_modules/lodash/_baseToString.js");
+
+/**
+ * Converts `value` to a string. An empty string is returned for `null`
+ * and `undefined` values. The sign of `-0` is preserved.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ * @example
+ *
+ * _.toString(null);
+ * // => ''
+ *
+ * _.toString(-0);
+ * // => '-0'
+ *
+ * _.toString([1, 2, 3]);
+ * // => '1,2,3'
+ */
+function toString(value) {
+  return value == null ? '' : baseToString(value);
+}
+
+module.exports = toString;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/uniqueId.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/uniqueId.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var toString = __webpack_require__(/*! ./toString */ "./node_modules/lodash/toString.js");
+
+/** Used to generate unique IDs. */
+var idCounter = 0;
+
+/**
+ * Generates a unique ID. If `prefix` is given, the ID is appended to it.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Util
+ * @param {string} [prefix=''] The value to prefix the ID with.
+ * @returns {string} Returns the unique ID.
+ * @example
+ *
+ * _.uniqueId('contact_');
+ * // => 'contact_104'
+ *
+ * _.uniqueId();
+ * // => '105'
+ */
+function uniqueId(prefix) {
+  var id = ++idCounter;
+  return toString(prefix) + id;
+}
+
+module.exports = uniqueId;
 
 
 /***/ }),
@@ -347,6 +849,17 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
 
+
+/***/ }),
+
+/***/ "react":
+/*!************************!*\
+  !*** external "React" ***!
+  \************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = window["React"];
 
 /***/ }),
 
@@ -2160,6 +2673,463 @@ function getWindow() {
     return win;
 }
 
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/components-shared/get-changed-params.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/swiper/components-shared/get-changed-params.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getChangedParams": () => (/* binding */ getChangedParams)
+/* harmony export */ });
+/* harmony import */ var _params_list_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./params-list.js */ "./node_modules/swiper/components-shared/params-list.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils.js */ "./node_modules/swiper/components-shared/utils.js");
+
+
+
+function getChangedParams(swiperParams, oldParams, children, oldChildren, getKey) {
+  const keys = [];
+  if (!oldParams) return keys;
+
+  const addKey = key => {
+    if (keys.indexOf(key) < 0) keys.push(key);
+  };
+
+  if (children && oldChildren) {
+    const oldChildrenKeys = oldChildren.map(getKey);
+    const childrenKeys = children.map(getKey);
+    if (oldChildrenKeys.join('') !== childrenKeys.join('')) addKey('children');
+    if (oldChildren.length !== children.length) addKey('children');
+  }
+
+  const watchParams = _params_list_js__WEBPACK_IMPORTED_MODULE_0__.paramsList.filter(key => key[0] === '_').map(key => key.replace(/_/, ''));
+  watchParams.forEach(key => {
+    if (key in swiperParams && key in oldParams) {
+      if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.isObject)(swiperParams[key]) && (0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.isObject)(oldParams[key])) {
+        const newKeys = Object.keys(swiperParams[key]);
+        const oldKeys = Object.keys(oldParams[key]);
+
+        if (newKeys.length !== oldKeys.length) {
+          addKey(key);
+        } else {
+          newKeys.forEach(newKey => {
+            if (swiperParams[key][newKey] !== oldParams[key][newKey]) {
+              addKey(key);
+            }
+          });
+          oldKeys.forEach(oldKey => {
+            if (swiperParams[key][oldKey] !== oldParams[key][oldKey]) addKey(key);
+          });
+        }
+      } else if (swiperParams[key] !== oldParams[key]) {
+        addKey(key);
+      }
+    }
+  });
+  return keys;
+}
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/components-shared/get-params.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/swiper/components-shared/get-params.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getParams": () => (/* binding */ getParams)
+/* harmony export */ });
+/* harmony import */ var swiper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! swiper */ "./node_modules/swiper/swiper.esm.js");
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils.js */ "./node_modules/swiper/components-shared/utils.js");
+/* harmony import */ var _params_list_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./params-list.js */ "./node_modules/swiper/components-shared/params-list.js");
+
+
+
+
+function getParams(obj, splitEvents) {
+  if (obj === void 0) {
+    obj = {};
+  }
+
+  if (splitEvents === void 0) {
+    splitEvents = true;
+  }
+
+  const params = {
+    on: {}
+  };
+  const events = {};
+  const passedParams = {};
+  (0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.extend)(params, swiper__WEBPACK_IMPORTED_MODULE_0__["default"].defaults);
+  (0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.extend)(params, swiper__WEBPACK_IMPORTED_MODULE_0__["default"].extendedDefaults);
+  params._emitClasses = true;
+  params.init = false;
+  const rest = {};
+  const allowedParams = _params_list_js__WEBPACK_IMPORTED_MODULE_2__.paramsList.map(key => key.replace(/_/, ''));
+  const plainObj = Object.assign({}, obj);
+  Object.keys(plainObj).forEach(key => {
+    if (typeof obj[key] === 'undefined') return;
+
+    if (allowedParams.indexOf(key) >= 0) {
+      if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.isObject)(obj[key])) {
+        params[key] = {};
+        passedParams[key] = {};
+        (0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.extend)(params[key], obj[key]);
+        (0,_utils_js__WEBPACK_IMPORTED_MODULE_1__.extend)(passedParams[key], obj[key]);
+      } else {
+        params[key] = obj[key];
+        passedParams[key] = obj[key];
+      }
+    } else if (key.search(/on[A-Z]/) === 0 && typeof obj[key] === 'function') {
+      if (splitEvents) {
+        events[`${key[2].toLowerCase()}${key.substr(3)}`] = obj[key];
+      } else {
+        params.on[`${key[2].toLowerCase()}${key.substr(3)}`] = obj[key];
+      }
+    } else {
+      rest[key] = obj[key];
+    }
+  });
+  ['navigation', 'pagination', 'scrollbar'].forEach(key => {
+    if (params[key] === true) params[key] = {};
+    if (params[key] === false) delete params[key];
+  });
+  return {
+    params,
+    passedParams,
+    rest,
+    events
+  };
+}
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/components-shared/mount-swiper.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/swiper/components-shared/mount-swiper.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "mountSwiper": () => (/* binding */ mountSwiper)
+/* harmony export */ });
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./node_modules/swiper/components-shared/utils.js");
+
+
+function mountSwiper(_ref, swiperParams) {
+  let {
+    el,
+    nextEl,
+    prevEl,
+    paginationEl,
+    scrollbarEl,
+    swiper
+  } = _ref;
+
+  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.needsNavigation)(swiperParams) && nextEl && prevEl) {
+    swiper.params.navigation.nextEl = nextEl;
+    swiper.originalParams.navigation.nextEl = nextEl;
+    swiper.params.navigation.prevEl = prevEl;
+    swiper.originalParams.navigation.prevEl = prevEl;
+  }
+
+  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.needsPagination)(swiperParams) && paginationEl) {
+    swiper.params.pagination.el = paginationEl;
+    swiper.originalParams.pagination.el = paginationEl;
+  }
+
+  if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.needsScrollbar)(swiperParams) && scrollbarEl) {
+    swiper.params.scrollbar.el = scrollbarEl;
+    swiper.originalParams.scrollbar.el = scrollbarEl;
+  }
+
+  swiper.init(el);
+}
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/components-shared/params-list.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/swiper/components-shared/params-list.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "paramsList": () => (/* binding */ paramsList)
+/* harmony export */ });
+/* underscore in name -> watch for changes */
+const paramsList = ['modules', 'init', '_direction', 'touchEventsTarget', 'initialSlide', '_speed', 'cssMode', 'updateOnWindowResize', 'resizeObserver', 'nested', 'focusableElements', '_enabled', '_width', '_height', 'preventInteractionOnTransition', 'userAgent', 'url', '_edgeSwipeDetection', '_edgeSwipeThreshold', '_freeMode', '_autoHeight', 'setWrapperSize', 'virtualTranslate', '_effect', 'breakpoints', '_spaceBetween', '_slidesPerView', 'maxBackfaceHiddenSlides', '_grid', '_slidesPerGroup', '_slidesPerGroupSkip', '_slidesPerGroupAuto', '_centeredSlides', '_centeredSlidesBounds', '_slidesOffsetBefore', '_slidesOffsetAfter', 'normalizeSlideIndex', '_centerInsufficientSlides', '_watchOverflow', 'roundLengths', 'touchRatio', 'touchAngle', 'simulateTouch', '_shortSwipes', '_longSwipes', 'longSwipesRatio', 'longSwipesMs', '_followFinger', 'allowTouchMove', '_threshold', 'touchMoveStopPropagation', 'touchStartPreventDefault', 'touchStartForcePreventDefault', 'touchReleaseOnEdges', 'uniqueNavElements', '_resistance', '_resistanceRatio', '_watchSlidesProgress', '_grabCursor', 'preventClicks', 'preventClicksPropagation', '_slideToClickedSlide', '_preloadImages', 'updateOnImagesReady', '_loop', '_loopAdditionalSlides', '_loopedSlides', '_loopedSlidesLimit', '_loopFillGroupWithBlank', 'loopPreventsSlide', '_rewind', '_allowSlidePrev', '_allowSlideNext', '_swipeHandler', '_noSwiping', 'noSwipingClass', 'noSwipingSelector', 'passiveListeners', 'containerModifierClass', 'slideClass', 'slideBlankClass', 'slideActiveClass', 'slideDuplicateActiveClass', 'slideVisibleClass', 'slideDuplicateClass', 'slideNextClass', 'slideDuplicateNextClass', 'slidePrevClass', 'slideDuplicatePrevClass', 'wrapperClass', 'runCallbacksOnInit', 'observer', 'observeParents', 'observeSlideChildren', // modules
+'a11y', '_autoplay', '_controller', 'coverflowEffect', 'cubeEffect', 'fadeEffect', 'flipEffect', 'creativeEffect', 'cardsEffect', 'hashNavigation', 'history', 'keyboard', 'lazy', 'mousewheel', '_navigation', '_pagination', 'parallax', '_scrollbar', '_thumbs', 'virtual', 'zoom'];
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/components-shared/update-on-virtual-data.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/swiper/components-shared/update-on-virtual-data.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "updateOnVirtualData": () => (/* binding */ updateOnVirtualData)
+/* harmony export */ });
+const updateOnVirtualData = swiper => {
+  if (!swiper || swiper.destroyed || !swiper.params.virtual || swiper.params.virtual && !swiper.params.virtual.enabled) return;
+  swiper.updateSlides();
+  swiper.updateProgress();
+  swiper.updateSlidesClasses();
+
+  if (swiper.lazy && swiper.params.lazy.enabled) {
+    swiper.lazy.load();
+  }
+
+  if (swiper.parallax && swiper.params.parallax && swiper.params.parallax.enabled) {
+    swiper.parallax.setTranslate();
+  }
+};
+
+/***/ }),
+
+/***/ "./node_modules/swiper/components-shared/update-swiper.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/swiper/components-shared/update-swiper.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "updateSwiper": () => (/* binding */ updateSwiper)
+/* harmony export */ });
+/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils.js */ "./node_modules/swiper/components-shared/utils.js");
+
+
+function updateSwiper(_ref) {
+  let {
+    swiper,
+    slides,
+    passedParams,
+    changedParams,
+    nextEl,
+    prevEl,
+    scrollbarEl,
+    paginationEl
+  } = _ref;
+  const updateParams = changedParams.filter(key => key !== 'children' && key !== 'direction');
+  const {
+    params: currentParams,
+    pagination,
+    navigation,
+    scrollbar,
+    virtual,
+    thumbs
+  } = swiper;
+  let needThumbsInit;
+  let needControllerInit;
+  let needPaginationInit;
+  let needScrollbarInit;
+  let needNavigationInit;
+
+  if (changedParams.includes('thumbs') && passedParams.thumbs && passedParams.thumbs.swiper && currentParams.thumbs && !currentParams.thumbs.swiper) {
+    needThumbsInit = true;
+  }
+
+  if (changedParams.includes('controller') && passedParams.controller && passedParams.controller.control && currentParams.controller && !currentParams.controller.control) {
+    needControllerInit = true;
+  }
+
+  if (changedParams.includes('pagination') && passedParams.pagination && (passedParams.pagination.el || paginationEl) && (currentParams.pagination || currentParams.pagination === false) && pagination && !pagination.el) {
+    needPaginationInit = true;
+  }
+
+  if (changedParams.includes('scrollbar') && passedParams.scrollbar && (passedParams.scrollbar.el || scrollbarEl) && (currentParams.scrollbar || currentParams.scrollbar === false) && scrollbar && !scrollbar.el) {
+    needScrollbarInit = true;
+  }
+
+  if (changedParams.includes('navigation') && passedParams.navigation && (passedParams.navigation.prevEl || prevEl) && (passedParams.navigation.nextEl || nextEl) && (currentParams.navigation || currentParams.navigation === false) && navigation && !navigation.prevEl && !navigation.nextEl) {
+    needNavigationInit = true;
+  }
+
+  const destroyModule = mod => {
+    if (!swiper[mod]) return;
+    swiper[mod].destroy();
+
+    if (mod === 'navigation') {
+      currentParams[mod].prevEl = undefined;
+      currentParams[mod].nextEl = undefined;
+      swiper[mod].prevEl = undefined;
+      swiper[mod].nextEl = undefined;
+    } else {
+      currentParams[mod].el = undefined;
+      swiper[mod].el = undefined;
+    }
+  };
+
+  updateParams.forEach(key => {
+    if ((0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.isObject)(currentParams[key]) && (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.isObject)(passedParams[key])) {
+      (0,_utils_js__WEBPACK_IMPORTED_MODULE_0__.extend)(currentParams[key], passedParams[key]);
+    } else {
+      const newValue = passedParams[key];
+
+      if ((newValue === true || newValue === false) && (key === 'navigation' || key === 'pagination' || key === 'scrollbar')) {
+        if (newValue === false) {
+          destroyModule(key);
+        }
+      } else {
+        currentParams[key] = passedParams[key];
+      }
+    }
+  });
+
+  if (updateParams.includes('controller') && !needControllerInit && swiper.controller && swiper.controller.control && currentParams.controller && currentParams.controller.control) {
+    swiper.controller.control = currentParams.controller.control;
+  }
+
+  if (changedParams.includes('children') && slides && virtual && currentParams.virtual.enabled) {
+    virtual.slides = slides;
+    virtual.update(true);
+  } else if (changedParams.includes('children') && swiper.lazy && swiper.params.lazy.enabled) {
+    swiper.lazy.load();
+  }
+
+  if (needThumbsInit) {
+    const initialized = thumbs.init();
+    if (initialized) thumbs.update(true);
+  }
+
+  if (needControllerInit) {
+    swiper.controller.control = currentParams.controller.control;
+  }
+
+  if (needPaginationInit) {
+    if (paginationEl) currentParams.pagination.el = paginationEl;
+    pagination.init();
+    pagination.render();
+    pagination.update();
+  }
+
+  if (needScrollbarInit) {
+    if (scrollbarEl) currentParams.scrollbar.el = scrollbarEl;
+    scrollbar.init();
+    scrollbar.updateSize();
+    scrollbar.setTranslate();
+  }
+
+  if (needNavigationInit) {
+    if (nextEl) currentParams.navigation.nextEl = nextEl;
+    if (prevEl) currentParams.navigation.prevEl = prevEl;
+    navigation.init();
+    navigation.update();
+  }
+
+  if (changedParams.includes('allowSlideNext')) {
+    swiper.allowSlideNext = passedParams.allowSlideNext;
+  }
+
+  if (changedParams.includes('allowSlidePrev')) {
+    swiper.allowSlidePrev = passedParams.allowSlidePrev;
+  }
+
+  if (changedParams.includes('direction')) {
+    swiper.changeDirection(passedParams.direction, false);
+  }
+
+  swiper.update();
+}
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/components-shared/utils.js":
+/*!********************************************************!*\
+  !*** ./node_modules/swiper/components-shared/utils.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "extend": () => (/* binding */ extend),
+/* harmony export */   "isObject": () => (/* binding */ isObject),
+/* harmony export */   "needsNavigation": () => (/* binding */ needsNavigation),
+/* harmony export */   "needsPagination": () => (/* binding */ needsPagination),
+/* harmony export */   "needsScrollbar": () => (/* binding */ needsScrollbar),
+/* harmony export */   "uniqueClasses": () => (/* binding */ uniqueClasses)
+/* harmony export */ });
+function isObject(o) {
+  return typeof o === 'object' && o !== null && o.constructor && Object.prototype.toString.call(o).slice(8, -1) === 'Object';
+}
+
+function extend(target, src) {
+  const noExtend = ['__proto__', 'constructor', 'prototype'];
+  Object.keys(src).filter(key => noExtend.indexOf(key) < 0).forEach(key => {
+    if (typeof target[key] === 'undefined') target[key] = src[key];else if (isObject(src[key]) && isObject(target[key]) && Object.keys(src[key]).length > 0) {
+      if (src[key].__swiper__) target[key] = src[key];else extend(target[key], src[key]);
+    } else {
+      target[key] = src[key];
+    }
+  });
+}
+
+function needsNavigation(params) {
+  if (params === void 0) {
+    params = {};
+  }
+
+  return params.navigation && typeof params.navigation.nextEl === 'undefined' && typeof params.navigation.prevEl === 'undefined';
+}
+
+function needsPagination(params) {
+  if (params === void 0) {
+    params = {};
+  }
+
+  return params.pagination && typeof params.pagination.el === 'undefined';
+}
+
+function needsScrollbar(params) {
+  if (params === void 0) {
+    params = {};
+  }
+
+  return params.scrollbar && typeof params.scrollbar.el === 'undefined';
+}
+
+function uniqueClasses(classNames) {
+  if (classNames === void 0) {
+    classNames = '';
+  }
+
+  const classes = classNames.split(' ').map(c => c.trim()).filter(c => !!c);
+  const unique = [];
+  classes.forEach(c => {
+    if (unique.indexOf(c) < 0) unique.push(c);
+  });
+  return unique.join(' ');
+}
 
 
 
@@ -12737,6 +13707,620 @@ function Zoom(_ref) {
 
 /***/ }),
 
+/***/ "./node_modules/swiper/react/context.js":
+/*!**********************************************!*\
+  !*** ./node_modules/swiper/react/context.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SwiperContext": () => (/* binding */ SwiperContext),
+/* harmony export */   "SwiperSlideContext": () => (/* binding */ SwiperSlideContext),
+/* harmony export */   "useSwiper": () => (/* binding */ useSwiper),
+/* harmony export */   "useSwiperSlide": () => (/* binding */ useSwiperSlide)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+
+const SwiperSlideContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)(null);
+const useSwiperSlide = () => {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(SwiperSlideContext);
+};
+const SwiperContext = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.createContext)(null);
+const useSwiper = () => {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useContext)(SwiperContext);
+};
+
+/***/ }),
+
+/***/ "./node_modules/swiper/react/get-children.js":
+/*!***************************************************!*\
+  !*** ./node_modules/swiper/react/get-children.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getChildren": () => (/* binding */ getChildren)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+
+
+function processChildren(c) {
+  const slides = [];
+  react__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(c).forEach(child => {
+    if (child.type && child.type.displayName === 'SwiperSlide') {
+      slides.push(child);
+    } else if (child.props && child.props.children) {
+      processChildren(child.props.children).forEach(slide => slides.push(slide));
+    }
+  });
+  return slides;
+}
+
+function getChildren(c) {
+  const slides = [];
+  const slots = {
+    'container-start': [],
+    'container-end': [],
+    'wrapper-start': [],
+    'wrapper-end': []
+  };
+  react__WEBPACK_IMPORTED_MODULE_0__.Children.toArray(c).forEach(child => {
+    if (child.type && child.type.displayName === 'SwiperSlide') {
+      slides.push(child);
+    } else if (child.props && child.props.slot && slots[child.props.slot]) {
+      slots[child.props.slot].push(child);
+    } else if (child.props && child.props.children) {
+      const foundSlides = processChildren(child.props.children);
+
+      if (foundSlides.length > 0) {
+        foundSlides.forEach(slide => slides.push(slide));
+      } else {
+        slots['container-end'].push(child);
+      }
+    } else {
+      slots['container-end'].push(child);
+    }
+  });
+  return {
+    slides,
+    slots
+  };
+}
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/react/loop.js":
+/*!*******************************************!*\
+  !*** ./node_modules/swiper/react/loop.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "calcLoopedSlides": () => (/* binding */ calcLoopedSlides),
+/* harmony export */   "renderLoop": () => (/* binding */ renderLoop)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var swiper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! swiper */ "./node_modules/swiper/swiper.esm.js");
+
+
+
+function calcLoopedSlides(slides, swiperParams) {
+  let slidesPerViewParams = swiperParams.slidesPerView;
+
+  if (swiperParams.breakpoints) {
+    const breakpoint = swiper__WEBPACK_IMPORTED_MODULE_1__["default"].prototype.getBreakpoint(swiperParams.breakpoints);
+    const breakpointOnlyParams = breakpoint in swiperParams.breakpoints ? swiperParams.breakpoints[breakpoint] : undefined;
+
+    if (breakpointOnlyParams && breakpointOnlyParams.slidesPerView) {
+      slidesPerViewParams = breakpointOnlyParams.slidesPerView;
+    }
+  }
+
+  let loopedSlides = Math.ceil(parseFloat(swiperParams.loopedSlides || slidesPerViewParams, 10));
+  loopedSlides += swiperParams.loopAdditionalSlides;
+
+  if (loopedSlides > slides.length && swiperParams.loopedSlidesLimit) {
+    loopedSlides = slides.length;
+  }
+
+  return loopedSlides;
+}
+
+function renderLoop(swiper, slides, swiperParams) {
+  const modifiedSlides = slides.map((child, index) => {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.cloneElement(child, {
+      swiper,
+      'data-swiper-slide-index': index
+    });
+  });
+
+  function duplicateSlide(child, index, position) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.cloneElement(child, {
+      key: `${child.key}-duplicate-${index}-${position}`,
+      className: `${child.props.className || ''} ${swiperParams.slideDuplicateClass}`
+    });
+  }
+
+  if (swiperParams.loopFillGroupWithBlank) {
+    const blankSlidesNum = swiperParams.slidesPerGroup - modifiedSlides.length % swiperParams.slidesPerGroup;
+
+    if (blankSlidesNum !== swiperParams.slidesPerGroup) {
+      for (let i = 0; i < blankSlidesNum; i += 1) {
+        const blankSlide = /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+          className: `${swiperParams.slideClass} ${swiperParams.slideBlankClass}`
+        });
+        modifiedSlides.push(blankSlide);
+      }
+    }
+  }
+
+  if (swiperParams.slidesPerView === 'auto' && !swiperParams.loopedSlides) {
+    swiperParams.loopedSlides = modifiedSlides.length;
+  }
+
+  const loopedSlides = calcLoopedSlides(modifiedSlides, swiperParams);
+  const prependSlides = [];
+  const appendSlides = [];
+
+  for (let i = 0; i < loopedSlides; i += 1) {
+    const index = i - Math.floor(i / modifiedSlides.length) * modifiedSlides.length;
+    appendSlides.push(duplicateSlide(modifiedSlides[index], i, 'append'));
+    prependSlides.unshift(duplicateSlide(modifiedSlides[modifiedSlides.length - index - 1], i, 'prepend'));
+  }
+
+  if (swiper) {
+    swiper.loopedSlides = loopedSlides;
+  }
+
+  return [...prependSlides, ...modifiedSlides, ...appendSlides];
+}
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/react/swiper-react.js":
+/*!***************************************************!*\
+  !*** ./node_modules/swiper/react/swiper-react.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Swiper": () => (/* reexport safe */ _swiper_js__WEBPACK_IMPORTED_MODULE_0__.Swiper),
+/* harmony export */   "SwiperSlide": () => (/* reexport safe */ _swiper_slide_js__WEBPACK_IMPORTED_MODULE_1__.SwiperSlide),
+/* harmony export */   "useSwiper": () => (/* reexport safe */ _context_js__WEBPACK_IMPORTED_MODULE_2__.useSwiper),
+/* harmony export */   "useSwiperSlide": () => (/* reexport safe */ _context_js__WEBPACK_IMPORTED_MODULE_2__.useSwiperSlide)
+/* harmony export */ });
+/* harmony import */ var _swiper_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./swiper.js */ "./node_modules/swiper/react/swiper.js");
+/* harmony import */ var _swiper_slide_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./swiper-slide.js */ "./node_modules/swiper/react/swiper-slide.js");
+/* harmony import */ var _context_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./context.js */ "./node_modules/swiper/react/context.js");
+/**
+ * Swiper React 8.3.2
+ * Most modern mobile touch slider and framework with hardware accelerated transitions
+ * https://swiperjs.com
+ *
+ * Copyright 2014-2022 Vladimir Kharlampidi
+ *
+ * Released under the MIT License
+ *
+ * Released on: July 26, 2022
+ */
+
+
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/react/swiper-slide.js":
+/*!***************************************************!*\
+  !*** ./node_modules/swiper/react/swiper-slide.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SwiperSlide": () => (/* binding */ SwiperSlide)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var _components_shared_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components-shared/utils.js */ "./node_modules/swiper/components-shared/utils.js");
+/* harmony import */ var _use_isomorphic_layout_effect_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./use-isomorphic-layout-effect.js */ "./node_modules/swiper/react/use-isomorphic-layout-effect.js");
+/* harmony import */ var _context_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./context.js */ "./node_modules/swiper/react/context.js");
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+
+const SwiperSlide = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(function (_temp, externalRef) {
+  let {
+    tag: Tag = 'div',
+    children,
+    className = '',
+    swiper,
+    zoom,
+    virtualIndex,
+    ...rest
+  } = _temp === void 0 ? {} : _temp;
+  const slideElRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const [slideClasses, setSlideClasses] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('swiper-slide');
+
+  function updateClasses(_s, el, classNames) {
+    if (el === slideElRef.current) {
+      setSlideClasses(classNames);
+    }
+  }
+
+  (0,_use_isomorphic_layout_effect_js__WEBPACK_IMPORTED_MODULE_2__.useIsomorphicLayoutEffect)(() => {
+    if (externalRef) {
+      externalRef.current = slideElRef.current;
+    }
+
+    if (!slideElRef.current || !swiper) {
+      return;
+    }
+
+    if (swiper.destroyed) {
+      if (slideClasses !== 'swiper-slide') {
+        setSlideClasses('swiper-slide');
+      }
+
+      return;
+    }
+
+    swiper.on('_slideClass', updateClasses); // eslint-disable-next-line
+
+    return () => {
+      if (!swiper) return;
+      swiper.off('_slideClass', updateClasses);
+    };
+  });
+  (0,_use_isomorphic_layout_effect_js__WEBPACK_IMPORTED_MODULE_2__.useIsomorphicLayoutEffect)(() => {
+    if (swiper && slideElRef.current && !swiper.destroyed) {
+      setSlideClasses(swiper.getSlideClasses(slideElRef.current));
+    }
+  }, [swiper]);
+  const slideData = {
+    isActive: slideClasses.indexOf('swiper-slide-active') >= 0 || slideClasses.indexOf('swiper-slide-duplicate-active') >= 0,
+    isVisible: slideClasses.indexOf('swiper-slide-visible') >= 0,
+    isDuplicate: slideClasses.indexOf('swiper-slide-duplicate') >= 0,
+    isPrev: slideClasses.indexOf('swiper-slide-prev') >= 0 || slideClasses.indexOf('swiper-slide-duplicate-prev') >= 0,
+    isNext: slideClasses.indexOf('swiper-slide-next') >= 0 || slideClasses.indexOf('swiper-slide-duplicate-next') >= 0
+  };
+
+  const renderChildren = () => {
+    return typeof children === 'function' ? children(slideData) : children;
+  };
+
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(Tag, _extends({
+    ref: slideElRef,
+    className: (0,_components_shared_utils_js__WEBPACK_IMPORTED_MODULE_1__.uniqueClasses)(`${slideClasses}${className ? ` ${className}` : ''}`),
+    "data-swiper-slide-index": virtualIndex
+  }, rest), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_context_js__WEBPACK_IMPORTED_MODULE_3__.SwiperSlideContext.Provider, {
+    value: slideData
+  }, zoom ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    className: "swiper-zoom-container",
+    "data-swiper-zoom": typeof zoom === 'number' ? zoom : undefined
+  }, renderChildren()) : renderChildren()));
+});
+SwiperSlide.displayName = 'SwiperSlide';
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/react/swiper.js":
+/*!*********************************************!*\
+  !*** ./node_modules/swiper/react/swiper.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Swiper": () => (/* binding */ Swiper)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var swiper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! swiper */ "./node_modules/swiper/swiper.esm.js");
+/* harmony import */ var _components_shared_get_params_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components-shared/get-params.js */ "./node_modules/swiper/components-shared/get-params.js");
+/* harmony import */ var _components_shared_mount_swiper_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components-shared/mount-swiper.js */ "./node_modules/swiper/components-shared/mount-swiper.js");
+/* harmony import */ var _components_shared_utils_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components-shared/utils.js */ "./node_modules/swiper/components-shared/utils.js");
+/* harmony import */ var _loop_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./loop.js */ "./node_modules/swiper/react/loop.js");
+/* harmony import */ var _components_shared_get_changed_params_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../components-shared/get-changed-params.js */ "./node_modules/swiper/components-shared/get-changed-params.js");
+/* harmony import */ var _get_children_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./get-children.js */ "./node_modules/swiper/react/get-children.js");
+/* harmony import */ var _components_shared_update_swiper_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../components-shared/update-swiper.js */ "./node_modules/swiper/components-shared/update-swiper.js");
+/* harmony import */ var _virtual_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./virtual.js */ "./node_modules/swiper/react/virtual.js");
+/* harmony import */ var _components_shared_update_on_virtual_data_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../components-shared/update-on-virtual-data.js */ "./node_modules/swiper/components-shared/update-on-virtual-data.js");
+/* harmony import */ var _use_isomorphic_layout_effect_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./use-isomorphic-layout-effect.js */ "./node_modules/swiper/react/use-isomorphic-layout-effect.js");
+/* harmony import */ var _context_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./context.js */ "./node_modules/swiper/react/context.js");
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const Swiper = /*#__PURE__*/(0,react__WEBPACK_IMPORTED_MODULE_0__.forwardRef)(function (_temp, externalElRef) {
+  let {
+    className,
+    tag: Tag = 'div',
+    wrapperTag: WrapperTag = 'div',
+    children,
+    onSwiper,
+    ...rest
+  } = _temp === void 0 ? {} : _temp;
+  let eventsAssigned = false;
+  const [containerClasses, setContainerClasses] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('swiper');
+  const [virtualData, setVirtualData] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
+  const [breakpointChanged, setBreakpointChanged] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+  const initializedRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(false);
+  const swiperElRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const swiperRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const oldPassedParamsRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const oldSlides = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const nextElRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const prevElRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const paginationElRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const scrollbarElRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  const {
+    params: swiperParams,
+    passedParams,
+    rest: restProps,
+    events
+  } = (0,_components_shared_get_params_js__WEBPACK_IMPORTED_MODULE_2__.getParams)(rest);
+  const {
+    slides,
+    slots
+  } = (0,_get_children_js__WEBPACK_IMPORTED_MODULE_7__.getChildren)(children);
+
+  const onBeforeBreakpoint = () => {
+    setBreakpointChanged(!breakpointChanged);
+  };
+
+  Object.assign(swiperParams.on, {
+    _containerClasses(swiper, classes) {
+      setContainerClasses(classes);
+    }
+
+  });
+
+  const initSwiper = () => {
+    // init swiper
+    Object.assign(swiperParams.on, events);
+    eventsAssigned = true;
+    swiperRef.current = new swiper__WEBPACK_IMPORTED_MODULE_1__["default"](swiperParams);
+
+    swiperRef.current.loopCreate = () => {};
+
+    swiperRef.current.loopDestroy = () => {};
+
+    if (swiperParams.loop) {
+      swiperRef.current.loopedSlides = (0,_loop_js__WEBPACK_IMPORTED_MODULE_5__.calcLoopedSlides)(slides, swiperParams);
+    }
+
+    if (swiperRef.current.virtual && swiperRef.current.params.virtual.enabled) {
+      swiperRef.current.virtual.slides = slides;
+      const extendWith = {
+        cache: false,
+        slides,
+        renderExternal: setVirtualData,
+        renderExternalUpdate: false
+      };
+      (0,_components_shared_utils_js__WEBPACK_IMPORTED_MODULE_4__.extend)(swiperRef.current.params.virtual, extendWith);
+      (0,_components_shared_utils_js__WEBPACK_IMPORTED_MODULE_4__.extend)(swiperRef.current.originalParams.virtual, extendWith);
+    }
+  };
+
+  if (!swiperElRef.current) {
+    initSwiper();
+  } // Listen for breakpoints change
+
+
+  if (swiperRef.current) {
+    swiperRef.current.on('_beforeBreakpoint', onBeforeBreakpoint);
+  }
+
+  const attachEvents = () => {
+    if (eventsAssigned || !events || !swiperRef.current) return;
+    Object.keys(events).forEach(eventName => {
+      swiperRef.current.on(eventName, events[eventName]);
+    });
+  };
+
+  const detachEvents = () => {
+    if (!events || !swiperRef.current) return;
+    Object.keys(events).forEach(eventName => {
+      swiperRef.current.off(eventName, events[eventName]);
+    });
+  };
+
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    return () => {
+      if (swiperRef.current) swiperRef.current.off('_beforeBreakpoint', onBeforeBreakpoint);
+    };
+  }); // set initialized flag
+
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    if (!initializedRef.current && swiperRef.current) {
+      swiperRef.current.emitSlidesClasses();
+      initializedRef.current = true;
+    }
+  }); // mount swiper
+
+  (0,_use_isomorphic_layout_effect_js__WEBPACK_IMPORTED_MODULE_11__.useIsomorphicLayoutEffect)(() => {
+    if (externalElRef) {
+      externalElRef.current = swiperElRef.current;
+    }
+
+    if (!swiperElRef.current) return;
+
+    if (swiperRef.current.destroyed) {
+      initSwiper();
+    }
+
+    (0,_components_shared_mount_swiper_js__WEBPACK_IMPORTED_MODULE_3__.mountSwiper)({
+      el: swiperElRef.current,
+      nextEl: nextElRef.current,
+      prevEl: prevElRef.current,
+      paginationEl: paginationElRef.current,
+      scrollbarEl: scrollbarElRef.current,
+      swiper: swiperRef.current
+    }, swiperParams);
+    if (onSwiper) onSwiper(swiperRef.current); // eslint-disable-next-line
+
+    return () => {
+      if (swiperRef.current && !swiperRef.current.destroyed) {
+        swiperRef.current.destroy(true, false);
+      }
+    };
+  }, []); // watch for params change
+
+  (0,_use_isomorphic_layout_effect_js__WEBPACK_IMPORTED_MODULE_11__.useIsomorphicLayoutEffect)(() => {
+    attachEvents();
+    const changedParams = (0,_components_shared_get_changed_params_js__WEBPACK_IMPORTED_MODULE_6__.getChangedParams)(passedParams, oldPassedParamsRef.current, slides, oldSlides.current, c => c.key);
+    oldPassedParamsRef.current = passedParams;
+    oldSlides.current = slides;
+
+    if (changedParams.length && swiperRef.current && !swiperRef.current.destroyed) {
+      (0,_components_shared_update_swiper_js__WEBPACK_IMPORTED_MODULE_8__.updateSwiper)({
+        swiper: swiperRef.current,
+        slides,
+        passedParams,
+        changedParams,
+        nextEl: nextElRef.current,
+        prevEl: prevElRef.current,
+        scrollbarEl: scrollbarElRef.current,
+        paginationEl: paginationElRef.current
+      });
+    }
+
+    return () => {
+      detachEvents();
+    };
+  }); // update on virtual update
+
+  (0,_use_isomorphic_layout_effect_js__WEBPACK_IMPORTED_MODULE_11__.useIsomorphicLayoutEffect)(() => {
+    (0,_components_shared_update_on_virtual_data_js__WEBPACK_IMPORTED_MODULE_10__.updateOnVirtualData)(swiperRef.current);
+  }, [virtualData]); // bypass swiper instance to slides
+
+  function renderSlides() {
+    if (swiperParams.virtual) {
+      return (0,_virtual_js__WEBPACK_IMPORTED_MODULE_9__.renderVirtual)(swiperRef.current, slides, virtualData);
+    }
+
+    if (!swiperParams.loop || swiperRef.current && swiperRef.current.destroyed) {
+      return slides.map(child => {
+        return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.cloneElement(child, {
+          swiper: swiperRef.current
+        });
+      });
+    }
+
+    return (0,_loop_js__WEBPACK_IMPORTED_MODULE_5__.renderLoop)(swiperRef.current, slides, swiperParams);
+  }
+
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(Tag, _extends({
+    ref: swiperElRef,
+    className: (0,_components_shared_utils_js__WEBPACK_IMPORTED_MODULE_4__.uniqueClasses)(`${containerClasses}${className ? ` ${className}` : ''}`)
+  }, restProps), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(_context_js__WEBPACK_IMPORTED_MODULE_12__.SwiperContext.Provider, {
+    value: swiperRef.current
+  }, slots['container-start'], /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(WrapperTag, {
+    className: "swiper-wrapper"
+  }, slots['wrapper-start'], renderSlides(), slots['wrapper-end']), (0,_components_shared_utils_js__WEBPACK_IMPORTED_MODULE_4__.needsNavigation)(swiperParams) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    ref: prevElRef,
+    className: "swiper-button-prev"
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    ref: nextElRef,
+    className: "swiper-button-next"
+  })), (0,_components_shared_utils_js__WEBPACK_IMPORTED_MODULE_4__.needsScrollbar)(swiperParams) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    ref: scrollbarElRef,
+    className: "swiper-scrollbar"
+  }), (0,_components_shared_utils_js__WEBPACK_IMPORTED_MODULE_4__.needsPagination)(swiperParams) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", {
+    ref: paginationElRef,
+    className: "swiper-pagination"
+  }), slots['container-end']));
+});
+Swiper.displayName = 'Swiper';
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/react/use-isomorphic-layout-effect.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/swiper/react/use-isomorphic-layout-effect.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "useIsomorphicLayoutEffect": () => (/* binding */ useIsomorphicLayoutEffect)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+
+
+function useIsomorphicLayoutEffect(callback, deps) {
+  // eslint-disable-next-line
+  if (typeof window === 'undefined') return (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(callback, deps);
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.useLayoutEffect)(callback, deps);
+}
+
+
+
+/***/ }),
+
+/***/ "./node_modules/swiper/react/virtual.js":
+/*!**********************************************!*\
+  !*** ./node_modules/swiper/react/virtual.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "renderVirtual": () => (/* binding */ renderVirtual)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+
+
+function renderVirtual(swiper, slides, virtualData) {
+  if (!virtualData) return null;
+  const style = swiper.isHorizontal() ? {
+    [swiper.rtlTranslate ? 'right' : 'left']: `${virtualData.offset}px`
+  } : {
+    top: `${virtualData.offset}px`
+  };
+  return slides.filter((child, index) => index >= virtualData.from && index <= virtualData.to).map(child => {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0__.cloneElement(child, {
+      swiper,
+      style
+    });
+  });
+}
+
+
+
+/***/ }),
+
 /***/ "./node_modules/swiper/shared/classes-to-selector.js":
 /*!***********************************************************!*\
   !*** ./node_modules/swiper/shared/classes-to-selector.js ***!
@@ -13548,7 +15132,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"posts_per_page":{"type":"number","default":3},"post_type":{"type":"string","default":"post"},"taxonomy":{"type":"array"},"terms":{"type":"array"},"order":{"type":"string","default":"desc"},"orderby":{"type":"string","default":"date"}}}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"posts_per_page":{"type":"number","default":3},"post_type":{"type":"string","default":"post"},"taxonomy":{"type":"array"},"terms":{"type":"array"},"order":{"type":"string","default":"desc"},"orderby":{"type":"string","default":"date"},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false}}}');
 
 /***/ })
 
@@ -13636,6 +15220,18 @@ module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json
 /******/ 				}
 /******/ 			}
 /******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

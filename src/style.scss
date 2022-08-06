@@ -5,6 +5,12 @@
  * Replace them with your own styles or remove the file completely.
  */
 
+@import "swiper/scss";
+@import "swiper/scss/a11y";
+@import "swiper/scss/navigation";
+@import "swiper/css/pagination";
+@import "swiper/css/scrollbar";
+
 .wp-block-cth-blocks-cth-post-carousel {
 	padding-top: 30px;
 	.cth-post-carousel-list {

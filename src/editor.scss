@@ -5,5 +5,10 @@
  */
 
 .wp-block-cth-blocks-cth-post-carousel {
-	border: 1px dotted #f00;
+	&.is-selected {
+		border: 1px dotted rgba(0, 0, 0, 0.2);
+	}
+	[class*="components-card-"] {
+		border: none;
+	}
 }
