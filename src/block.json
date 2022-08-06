@@ -13,6 +13,7 @@
 	},
 	"textdomain": "cth-post-carousel",
 	"editorScript": "file:./index.js",
+	"viewScript": "file:./swiper.js",
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
 	"attributes": {

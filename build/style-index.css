@@ -8,9 +8,13 @@
  * Replace them with your own styles or remove the file completely.
  */
 .wp-block-cth-blocks-cth-post-carousel {
-  background-color: #21759b;
-  color: #fff;
-  padding: 2px;
+  padding-top: 30px;
+}
+.wp-block-cth-blocks-cth-post-carousel .cth-post-carousel-list {
+  list-style: none;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
 /*# sourceMappingURL=style-index.css.map*/

@@ -6,7 +6,11 @@
  */
 
 .wp-block-cth-blocks-cth-post-carousel {
-	background-color: #21759b;
-	color: #fff;
-	padding: 2px;
+	padding-top: 30px;
+	.cth-post-carousel-list {
+		list-style: none;
+		list-style-type: none;
+		padding: 0;
+		margin: 0;
+	}
 }
