@@ -30,7 +30,7 @@
 			"default": "post"
 		},
 		"taxonomy": {
-			"type": "array"
+			"type": "string"
 		},
 		"terms": {
 			"type": "array"

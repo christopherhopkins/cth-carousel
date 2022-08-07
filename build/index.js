@@ -63,7 +63,12 @@ function Edit(_ref) {
     dots,
     scrollbar
   } = attributes;
-  const posts = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => {
+  /**
+   * UseSelects
+  */
+
+  const posts = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)( // main query
+  select => {
     return select('core').getEntityRecords('postType', post_type, {
       per_page: posts_per_page,
       _embed: true,
@@ -71,7 +76,43 @@ function Edit(_ref) {
       orderby: orderby,
       taxonomy: terms
     });
-  }, [posts_per_page, order, orderby, taxonomy]);
+  }, [posts_per_page, order, orderby, taxonomy, post_type]);
+  const registeredPostTypes = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)( // get All post types
+  select => {
+    return select('core').getPostTypes();
+  }, [post_type]);
+  const currentPostType = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_3__.useSelect)(select => {
+    return select('core').getPostType(post_type);
+  }, [post_type]);
+  /**
+   * Utilities
+  */
+
+  let visiblePostTypes = null;
+  let postTypesArray = null;
+  let postTypeTaxonomyArray = null;
+  let currentPostTypeTaxonomies = null;
+
+  if (registeredPostTypes) {
+    // filter out for only visible post types
+    visiblePostTypes = registeredPostTypes.filter(postType => postType.visibility.show_in_nav_menus === true);
+    postTypesArray = visiblePostTypes.map(type => {
+      return {
+        label: type.name,
+        value: type.slug
+      };
+    });
+  }
+
+  if (currentPostType) {
+    currentPostTypeTaxonomies = currentPostType.taxonomies.map(taxonomy => {
+      return {
+        label: taxonomy,
+        value: taxonomy
+      };
+    });
+  }
+
   const placeholders = [];
 
   for (let i = 0; i < posts_per_page; i++) {
@@ -83,6 +124,18 @@ function Edit(_ref) {
 
   /** Query Settings */
 
+
+  const onChangePostType = type => {
+    setAttributes({
+      post_type: type
+    });
+  };
+
+  const onChangeTaxonomy = tax => {
+    setAttributes({
+      taxonomy: tax
+    });
+  };
 
   const onChangePostsPerPage = number => {
     setAttributes({
@@ -134,7 +187,7 @@ function Edit(_ref) {
     });
   };
   /**
-   * Ensure unique ID
+   * UseEffects
   */
 
 
@@ -145,13 +198,27 @@ function Edit(_ref) {
   }, []);
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.InspectorControls, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.PanelBody, {
     title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Query Settings", "cth")
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.QueryControls, {
+  }, !postTypesArray && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, null), postTypesArray && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.SelectControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Post Type", "cth"),
+    value: post_type,
+    onChange: onChangePostType,
+    options: postTypesArray,
+    __nextHasNoMarginBottom: true
+  }), !currentPostTypeTaxonomies && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, null), currentPostTypeTaxonomies && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.SelectControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Taxonomy", "cth"),
+    value: taxonomy,
+    onChange: onChangeTaxonomy,
+    options: currentPostTypeTaxonomies,
+    __nextHasNoMarginBottom: true
+  })), postTypesArray && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.QueryControls, {
     numberOfItems: posts_per_page,
     order: order,
     orderBy: orderby,
     onOrderChange: onChangeOrder,
     onOrderByChange: onChangeOrderBy,
-    onNumberOfItemsChange: onChangePostsPerPage
+    onNumberOfItemsChange: onChangePostsPerPage // categorySuggestions={postTypeTaxonomyArray}
+    // selectedCategories={terms}
+
   })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.PanelBody, {
     title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Carousel Settings", "cth")
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.RangeControl, {
@@ -15132,7 +15199,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"posts_per_page":{"type":"number","default":3},"post_type":{"type":"string","default":"post"},"taxonomy":{"type":"array"},"terms":{"type":"array"},"order":{"type":"string","default":"desc"},"orderby":{"type":"string","default":"date"},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false}}}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"posts_per_page":{"type":"number","default":3},"post_type":{"type":"string","default":"post"},"taxonomy":{"type":"string"},"terms":{"type":"array"},"order":{"type":"string","default":"desc"},"orderby":{"type":"string","default":"date"},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false}}}');
 
 /***/ })
 

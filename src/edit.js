@@ -14,6 +14,7 @@ import {
   CardBody,
   CardFooter,
   RangeControl,
+  SelectControl,
   __experimentalHeading as Header,
   __experimentalGrid as Grid,
 } from "@wordpress/components";
@@ -42,17 +43,48 @@ export default function Edit({ attributes, setAttributes }) {
     dots,
     scrollbar
   } = attributes;
-  const posts = useSelect(
-    ( select ) => {
-      return select('core').getEntityRecords('postType', post_type, {
-        per_page: posts_per_page,
-        _embed: true,
-        order: order,
-        orderby: orderby,
-        taxonomy: terms
-      } );
-    }, [posts_per_page, order, orderby, taxonomy]
-  );
+  /**
+   * UseSelects
+  */
+   const posts = useSelect( // main query
+   ( select ) => {
+     return select('core').getEntityRecords('postType', post_type, {
+       per_page: posts_per_page,
+       _embed: true,
+       order: order,
+       orderby: orderby,
+       taxonomy: terms
+     } );
+  }, [posts_per_page, order, orderby, taxonomy, post_type]
+ );
+ const registeredPostTypes = useSelect( // get All post types
+   ( select ) => {
+     return select('core').getPostTypes();
+   }, [post_type]
+ );
+ const currentPostType = useSelect(
+   ( select ) => {
+     return select('core').getPostType(post_type);
+   }, [post_type]
+ );
+  /**
+   * Utilities
+  */
+  let visiblePostTypes = null;
+  let postTypesArray = null;
+  let postTypeTaxonomyArray = null;
+  let currentPostTypeTaxonomies = null;
+  if( registeredPostTypes ) { // filter out for only visible post types
+    visiblePostTypes = registeredPostTypes.filter( (postType) => postType.visibility.show_in_nav_menus === true );
+    postTypesArray = visiblePostTypes.map( (type) => {
+      return { label: type.name, value: type.slug };
+    } );
+  }
+  if(currentPostType) {
+    currentPostTypeTaxonomies = currentPostType.taxonomies.map( (taxonomy) => {
+      return { label: taxonomy, value: taxonomy };
+    } );
+  }
   const placeholders = [];
   for ( let i = 0; i < posts_per_page; i++ ) {
     placeholders.push(i);
@@ -61,6 +93,12 @@ export default function Edit({ attributes, setAttributes }) {
    * On Change Functions
   */
   /** Query Settings */
+  const onChangePostType = (type) => {
+    setAttributes( { post_type: type } );
+  };
+  const onChangeTaxonomy = (tax) => {
+    setAttributes( { taxonomy: tax } );
+  }
   const onChangePostsPerPage = (number) => {
     setAttributes( { posts_per_page: number } );
   }
@@ -87,7 +125,7 @@ export default function Edit({ attributes, setAttributes }) {
     setAttributes( { dots: !dots } );
   }
   /**
-   * Ensure unique ID
+   * UseEffects
   */
   useEffect( () => {
     setAttributes( { blockID: _uniqueId() } );
@@ -96,17 +134,46 @@ export default function Edit({ attributes, setAttributes }) {
 		<>
       <InspectorControls>
         <PanelBody title={ __( "Query Settings", "cth" ) }>
-          <QueryControls
-            numberOfItems={posts_per_page}
-            order={order}
-            orderBy={orderby}
-            onOrderChange={onChangeOrder}
-            onOrderByChange={onChangeOrderBy}
-            onNumberOfItemsChange={onChangePostsPerPage}
-          />
+          {!postTypesArray &&
+            <Spinner/>
+          }
+          {postTypesArray && 
+            <>
+              <SelectControl
+                label={__( "Post Type", "cth" )}
+                value={post_type}
+                onChange={onChangePostType}
+                options={postTypesArray}
+                __nextHasNoMarginBottom
+              />
+              {!currentPostTypeTaxonomies &&
+                <Spinner/>
+              }
+              {currentPostTypeTaxonomies &&
+                <SelectControl 
+                  label={__( "Taxonomy", "cth" )}
+                  value={taxonomy}
+                  onChange={onChangeTaxonomy}
+                  options={currentPostTypeTaxonomies}
+                  __nextHasNoMarginBottom
+                />
+              }
+            </>
+          }
+          {postTypesArray && 
+            <QueryControls
+              numberOfItems={posts_per_page}
+              order={order}
+              orderBy={orderby}
+              onOrderChange={onChangeOrder}
+              onOrderByChange={onChangeOrderBy}
+              onNumberOfItemsChange={onChangePostsPerPage}
+              // categorySuggestions={postTypeTaxonomyArray}
+              // selectedCategories={terms}
+            />
+          }
         </PanelBody>
         <PanelBody title={__( "Carousel Settings", "cth" )}>
-          
           <RangeControl
             label={__( "Slides Per View", "cth" )}
             value={slides_per_view}
