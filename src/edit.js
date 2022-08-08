@@ -39,7 +39,8 @@ export default function Edit({ attributes, setAttributes }) {
     loop,
     navigation,
     dots,
-    scrollbar
+    scrollbar,
+    slide_gap
   } = attributes;
   /**
    * Posts (Main Query for Rendering)
@@ -161,6 +162,9 @@ export default function Edit({ attributes, setAttributes }) {
   }
   const onChangePostsPerPage = (number) => {
     setAttributes( { posts_per_page: number } );
+    if( number === 1 ) {
+      onChangeSlidesPerView(number); // make sure this doesn't get stuck on 2
+    }
   }
   const onChangeOrder = (newOrder) => {
     setAttributes( { order: newOrder } );
@@ -171,6 +175,9 @@ export default function Edit({ attributes, setAttributes }) {
   /** Carousel Settings */
   const onChangeSlidesPerView = (number) => {
     setAttributes( { slides_per_view: number } );
+    if( number === 1 ) {
+      setAttributes( { slide_gap: 0 } ); // no gap if only showing 1 slide
+    }
   }
   const onChangeLoop = () => {
     setAttributes( { loop: !loop } );
@@ -184,13 +191,16 @@ export default function Edit({ attributes, setAttributes }) {
   const onChangeDots = () => {
     setAttributes( { dots: !dots } );
   }
+  const onChangeSlideGap = (newGap) => {
+    setAttributes( { slide_gap: newGap } );
+  }
   /**
    * UseEffects
   */
   useEffect( () => {
     setAttributes( { blockID: _uniqueId() } );
   }, [] );
-  useEffect( () => {
+  useEffect( () => { // ensure actual term objects are set in attributes
     terms.forEach(function(term, index) {
       if( !term.slug ) {
         const hasSuggestion = catSuggestions[term.value];
@@ -255,6 +265,15 @@ export default function Edit({ attributes, setAttributes }) {
             min={1}
             max={posts_per_page}
           />
+          {slides_per_view > 1 &&
+            <RangeControl
+              label={__( "Slide Gap", "cth" )}
+              value={slide_gap}
+              onChange={onChangeSlideGap}
+              min={0}
+              max={100} //TODO: arbitrary, maybe use number input instead
+            />
+          }
           <Grid columns={2} gap={1}>
             <ToggleControl
               label={__( "Loop", "cth" )}
@@ -308,37 +327,33 @@ export default function Edit({ attributes, setAttributes }) {
           pagination={dots ? { clickable: true } : dots}
           scrollbar={scrollbar ? { draggable: true } : scrollbar}
           loop={loop}
+          noSwipingSelector="[data-wp-component='Card']"
+          spaceBetween={slide_gap}
         >
-          {!posts &&
-            placeholders.map( ( post ) => {
-              return(
-                <SwiperSlide key={post} className="cth-posts-carousel-placeholder-item">
-                  <Spinner />
-                </SwiperSlide>
-              );
-            } )
-          }
-          {posts &&
-            posts.map( ( post ) => {
-              return(
-                <SwiperSlide key={post.id}>
-                  <Card>
-                    <CardHeader>
-                      { post.title.rendered ? (
-                        <Header size={3}>
-                          { post.title.rendered }
-                        </Header>
-                      ) : (
-                        __( "No Title", "cth" )
-                      ) }
-                    </CardHeader>
-                    <CardBody>
-                      {post.excerpt.rendered && <RawHTML>{__(post.excerpt.rendered, "cth")}</RawHTML>}
-                    </CardBody>
-                  </Card>
-                </SwiperSlide>
-              );
-            } )
+          {posts 
+            ?
+              posts.map( ( post ) => {
+                return(
+                  <SwiperSlide key={post.id}>
+                    <Card>
+                      <CardHeader>
+                        { post.title.rendered ? (
+                          <Header size={3}>
+                            { post.title.rendered }
+                          </Header>
+                        ) : (
+                          __( "No Title", "cth" )
+                        ) }
+                      </CardHeader>
+                      <CardBody>
+                        {post.excerpt.rendered && <RawHTML>{__(post.excerpt.rendered, "cth")}</RawHTML>}
+                      </CardBody>
+                    </Card>
+                  </SwiperSlide>
+                );
+              } )
+            :
+              <Spinner />
           }
 				</Swiper>
 			</div>

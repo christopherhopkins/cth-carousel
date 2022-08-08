@@ -64,6 +64,10 @@
 		"scrollbar": {
 			"type": "boolean",
 			"default": false
+		},
+		"slide_gap": {
+			"type": "number",
+			"default": 30
 		}
 	}
 }

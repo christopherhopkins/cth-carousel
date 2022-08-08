@@ -9,8 +9,10 @@
 .wp-block-cth-blocks-cth-post-carousel.is-selected {
   border: 1px dotted rgba(0, 0, 0, 0.2);
 }
-.wp-block-cth-blocks-cth-post-carousel [class*=components-card-] {
+.wp-block-cth-blocks-cth-post-carousel [class*=components-card-],
+.wp-block-cth-blocks-cth-post-carousel [data-wp-component] {
   border: none;
+  box-shadow: none;
 }
 
 /*# sourceMappingURL=index.css.map*/

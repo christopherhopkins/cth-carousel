@@ -6,7 +6,7 @@ function cth_carousel( $attributes ) {
     */
     $blockID = $attributes["blockID"];
     $post_type = $attributes["post_type"] ?? "post";
-    $posts_per_page = $attributes["posts_per_page"] ?? 3;
+    $posts_per_page = $attributes["posts_per_page"];
     $orderby = $attributes["orderby"] ?? "date";
     $order = $attributes["order"] ?? "desc";
     $args = array(
@@ -49,6 +49,7 @@ function cth_carousel( $attributes ) {
             data-slides-per-view="<?= $attributes["slides_per_view"]; ?>"
             data-id="<?= $blockID; ?>"
             data-loop="<?= $attributes["loop"]; ?>"
+            data-slide-gap="<?= $attributes['slide_gap']; ?>"
         >
             <div class="swiper-wrapper">
                 <?php foreach($posts as $post) : ?>

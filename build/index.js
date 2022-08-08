@@ -60,7 +60,8 @@ function Edit(_ref) {
     loop,
     navigation,
     dots,
-    scrollbar
+    scrollbar,
+    slide_gap
   } = attributes;
   /**
    * Posts (Main Query for Rendering)
@@ -218,6 +219,10 @@ function Edit(_ref) {
     setAttributes({
       posts_per_page: number
     });
+
+    if (number === 1) {
+      onChangeSlidesPerView(number); // make sure this doesn't get stuck on 2
+    }
   };
 
   const onChangeOrder = newOrder => {
@@ -238,6 +243,12 @@ function Edit(_ref) {
     setAttributes({
       slides_per_view: number
     });
+
+    if (number === 1) {
+      setAttributes({
+        slide_gap: 0
+      }); // no gap if only showing 1 slide
+    }
   };
 
   const onChangeLoop = () => {
@@ -263,6 +274,12 @@ function Edit(_ref) {
       dots: !dots
     });
   };
+
+  const onChangeSlideGap = newGap => {
+    setAttributes({
+      slide_gap: newGap
+    });
+  };
   /**
    * UseEffects
   */
@@ -274,6 +291,7 @@ function Edit(_ref) {
     });
   }, []);
   (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    // ensure actual term objects are set in attributes
     terms.forEach(function (term, index) {
       if (!term.slug) {
         const hasSuggestion = catSuggestions[term.value];
@@ -323,6 +341,13 @@ function Edit(_ref) {
     onChange: onChangeSlidesPerView,
     min: 1,
     max: posts_per_page
+  }), slides_per_view > 1 && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.RangeControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Slide Gap", "cth"),
+    value: slide_gap,
+    onChange: onChangeSlideGap,
+    min: 0,
+    max: 100 //TODO: arbitrary, maybe use number input instead
+
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.__experimentalGrid, {
     columns: 2,
     gap: 1
@@ -359,19 +384,16 @@ function Edit(_ref) {
     scrollbar: scrollbar ? {
       draggable: true
     } : scrollbar,
-    loop: loop
-  }, !posts && placeholders.map(post => {
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.SwiperSlide, {
-      key: post,
-      className: "cth-posts-carousel-placeholder-item"
-    }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, null));
-  }), posts && posts.map(post => {
+    loop: loop,
+    noSwipingSelector: "[data-wp-component='Card']",
+    spaceBetween: slide_gap
+  }, posts ? posts.map(post => {
     return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.SwiperSlide, {
       key: post.id
     }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.CardHeader, null, post.title.rendered ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.__experimentalHeading, {
       size: 3
     }, post.title.rendered) : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Title", "cth")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.CardBody, null, post.excerpt.rendered && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.RawHTML, null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)(post.excerpt.rendered, "cth")))));
-  }))));
+  }) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, null))));
 }
 
 /***/ }),
@@ -16263,7 +16285,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"posts_per_page":{"type":"number","default":3},"post_type":{"type":"object","default":{"slug":"post"}},"terms":{"type":"array","items":{"type":"object"}},"order":{"type":"string","default":"desc"},"orderby":{"type":"string","default":"date"},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false}}}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"posts_per_page":{"type":"number","default":3},"post_type":{"type":"object","default":{"slug":"post"}},"terms":{"type":"array","items":{"type":"object"}},"order":{"type":"string","default":"desc"},"orderby":{"type":"string","default":"date"},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false},"slide_gap":{"type":"number","default":30}}}');
 
 /***/ })
 
