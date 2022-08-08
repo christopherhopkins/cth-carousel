@@ -12,14 +12,12 @@ import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
   RangeControl,
   SelectControl,
   __experimentalHeading as Header,
   __experimentalGrid as Grid,
 } from "@wordpress/components";
 import { useEffect, RawHTML } from "@wordpress/element";
-import classnames from "classnames";
 import isEmpty from "lodash/isEmpty";
 import _uniqueId from "lodash/uniqueId";
 import './editor.scss';
@@ -106,11 +104,6 @@ export default function Edit({ attributes, setAttributes }) {
       return { label: t.name, value: t.slug };
     } );
   }
-  // const postTypeObject = useSelect(
-  //   ( select ) => {
-  //     return select("core").getPostType(post_type)
-  //   }, [post_type]
-  // );
   /**
    * Taxonomy Terms
   */
@@ -155,7 +148,7 @@ export default function Edit({ attributes, setAttributes }) {
     const updatedPostType = registeredPostTypesFiltered.filter( (type) => type.slug === newPostType )[0] ?? { slug: newPostType };
     setAttributes( { 
       post_type: updatedPostType,
-      terms: []
+      terms: [] // reset terms when changing post types
     } );
   };
   const onChangeTerms = (newTerms) => {
