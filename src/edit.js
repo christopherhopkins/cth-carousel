@@ -319,20 +319,20 @@ export default function Edit({ attributes, setAttributes }) {
         </PanelBody>
       </InspectorControls>
 			<div { ...useBlockProps()}>
-				<Swiper 
-          className="cth-post-carousel-list swiper-wrapper"
-          modules={[A11y, Navigation, Pagination, Scrollbar]}
-          slidesPerView={slides_per_view}
-          navigation={navigation ? { clickable: true } : navigation}
-          pagination={dots ? { clickable: true } : dots}
-          scrollbar={scrollbar ? { draggable: true } : scrollbar}
-          loop={loop}
-          noSwipingSelector="[data-wp-component='Card']"
-          spaceBetween={slide_gap}
-        >
-          {posts 
-            ?
-              posts.map( ( post ) => {
+        {posts
+          ?
+            <Swiper 
+              className="cth-post-carousel-list swiper-wrapper"
+              modules={[A11y, Navigation, Pagination, Scrollbar]}
+              slidesPerView={slides_per_view}
+              navigation={navigation ? { clickable: true } : navigation}
+              pagination={dots ? { clickable: true } : dots}
+              scrollbar={scrollbar ? { draggable: true } : scrollbar}
+              loop={loop}
+              noSwipingSelector="[data-wp-component='Card']"
+              spaceBetween={slide_gap}
+            >
+              { posts.map( ( post ) => {
                 return(
                   <SwiperSlide key={post.id}>
                     <Card>
@@ -351,11 +351,14 @@ export default function Edit({ attributes, setAttributes }) {
                     </Card>
                   </SwiperSlide>
                 );
-              } )
-            :
+              } ) }
+            </Swiper>
+          :
+            <div className="posts-loading">
               <Spinner />
-          }
-				</Swiper>
+              <p>Loading...</p>
+            </div>
+        }
 			</div>
 		</>
 	);

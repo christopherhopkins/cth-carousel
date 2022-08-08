@@ -14,5 +14,13 @@
   border: none;
   box-shadow: none;
 }
+.wp-block-cth-blocks-cth-post-carousel .posts-loading {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+  min-height: 50px;
+}
 
 /*# sourceMappingURL=index.css.map*/

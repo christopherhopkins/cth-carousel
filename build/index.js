@@ -371,7 +371,7 @@ function Edit(_ref) {
     help: scrollbar ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Scrollbar", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Scrollbar", "cth"),
     checked: scrollbar,
     onChange: onChangeScrollbar
-  })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)(), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.Swiper, {
+  })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.useBlockProps)(), posts ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.Swiper, {
     className: "cth-post-carousel-list swiper-wrapper",
     modules: [swiper__WEBPACK_IMPORTED_MODULE_8__.A11y, swiper__WEBPACK_IMPORTED_MODULE_8__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_8__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_8__.Scrollbar],
     slidesPerView: slides_per_view,
@@ -387,13 +387,15 @@ function Edit(_ref) {
     loop: loop,
     noSwipingSelector: "[data-wp-component='Card']",
     spaceBetween: slide_gap
-  }, posts ? posts.map(post => {
+  }, posts.map(post => {
     return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_9__.SwiperSlide, {
       key: post.id
     }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Card, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.CardHeader, null, post.title.rendered ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.__experimentalHeading, {
       size: 3
     }, post.title.rendered) : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No Title", "cth")), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.CardBody, null, post.excerpt.rendered && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.RawHTML, null, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)(post.excerpt.rendered, "cth")))));
-  }) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, null))));
+  })) : (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+    className: "posts-loading"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__.Spinner, null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, "Loading..."))));
 }
 
 /***/ }),

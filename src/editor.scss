@@ -13,4 +13,12 @@
 		border: none;
 		box-shadow: none;
 	}
+	.posts-loading {
+		display: flex;
+		align-items: center;
+		align-content: center;
+		justify-content: center;
+		justify-items: center;
+		min-height: 50px;
+	}
 }
