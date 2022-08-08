@@ -20,7 +20,8 @@ import {
 } from "@wordpress/components";
 import { useEffect, RawHTML } from "@wordpress/element";
 import classnames from "classnames";
-import _uniqueId from 'lodash/uniqueId';
+import isEmpty from "lodash/isEmpty";
+import _uniqueId from "lodash/uniqueId";
 import './editor.scss';
 /**
  * Swiper
@@ -33,7 +34,6 @@ export default function Edit({ attributes, setAttributes }) {
     blockID,
     posts_per_page,
     post_type,
-    taxonomy,
     terms,
     order,
     orderby,
@@ -44,47 +44,105 @@ export default function Edit({ attributes, setAttributes }) {
     scrollbar
   } = attributes;
   /**
-   * UseSelects
+   * Posts (Main Query for Rendering)
+   * TODO: Support AND tax relation
   */
-   const posts = useSelect( // main query
-   ( select ) => {
-     return select('core').getEntityRecords('postType', post_type, {
-       per_page: posts_per_page,
-       _embed: true,
-       order: order,
-       orderby: orderby,
-       taxonomy: terms
-     } );
-  }, [posts_per_page, order, orderby, taxonomy, post_type]
- );
- const registeredPostTypes = useSelect( // get All post types
-   ( select ) => {
-     return select('core').getPostTypes();
-   }, [post_type]
- );
- const currentPostType = useSelect(
-   ( select ) => {
-     return select('core').getPostType(post_type);
-   }, [post_type]
- );
+  const posts = useSelect( // main query
+    ( select ) => {
+      const query_args = {
+        context: "view",
+        status: "publish",
+        per_page: posts_per_page,
+        _embed: true,
+        order: order,
+        orderby: orderby,
+        tax_relation: "OR"
+      };
+      if( terms.length > 0 ) {
+        for(const term of terms) {
+          switch( term.taxonomy ) {
+            case "category":
+              if( !("categories" in query_args) ) {
+                query_args["categories"] = [];
+                query_args["categories"].push(term.id);
+              } else {
+                query_args["categories"].push(term.id);
+              }
+              break;
+            case "post_tag":
+              if( !("tags" in query_args) ) {
+                query_args["tags"] = [];
+                query_args["tags"].push(term.id);
+              } else {
+                query_args["tags"].push(term.id);
+              }
+              break;
+            default:
+              if( !(term.taxonomy in query_args) ) {
+                query_args[term.taxonomy] = [];
+                query_args[term.taxonomy].push(term.id);
+              } else {
+                query_args[term.taxonomy].push(term.id);
+              }
+          }
+        }
+      }
+      return select("core").getEntityRecords("postType", post_type.slug, query_args );
+    }, [posts_per_page, order, orderby, terms, post_type]
+  );
+  /**
+  * Post Types
+  */
+  let postTypeOptions = [];
+  let registeredPostTypesFiltered = [];
+  const registeredPostTypes = useSelect( // get All post types
+    ( select ) => {
+      return select("core").getPostTypes();
+    }, [] // run on render, this won't change
+  );
+  if( registeredPostTypes ) {
+    registeredPostTypesFiltered = registeredPostTypes.filter(pt => pt.viewable && pt.visibility.show_in_nav_menus);
+    postTypeOptions = registeredPostTypesFiltered.map( (t) => {
+      return { label: t.name, value: t.slug };
+    } );
+  }
+  // const postTypeObject = useSelect(
+  //   ( select ) => {
+  //     return select("core").getPostType(post_type)
+  //   }, [post_type]
+  // );
+  /**
+   * Taxonomy Terms
+  */
+  const allCats = useSelect(
+    ( select ) => {
+      const returnArray = [];
+      const postTypeObject = post_type.taxonomies ? post_type : registeredPostTypesFiltered.filter( (type) => type.slug === post_type.slug )[0];
+      if( postTypeObject ) {
+        const postTypeTaxonomies = postTypeObject.taxonomies;
+        if( postTypeTaxonomies ) {
+          for(const tax of postTypeTaxonomies) {
+            const taxTerms = select("core").getEntityRecords("taxonomy", tax, { per_page: -1 });
+            if( taxTerms ) {
+              for(const term of taxTerms) {
+                returnArray.push(term);
+              }
+            }
+          }
+        }
+      }
+      return returnArray;
+    }, [post_type]
+  );
+  const catSuggestions = {};
+  if( allCats ) {
+    for(const cat of allCats) {
+      catSuggestions[cat.name] = cat;
+    }
+  }
   /**
    * Utilities
   */
-  let visiblePostTypes = null;
-  let postTypesArray = null;
-  let postTypeTaxonomyArray = null;
-  let currentPostTypeTaxonomies = null;
-  if( registeredPostTypes ) { // filter out for only visible post types
-    visiblePostTypes = registeredPostTypes.filter( (postType) => postType.visibility.show_in_nav_menus === true );
-    postTypesArray = visiblePostTypes.map( (type) => {
-      return { label: type.name, value: type.slug };
-    } );
-  }
-  if(currentPostType) {
-    currentPostTypeTaxonomies = currentPostType.taxonomies.map( (taxonomy) => {
-      return { label: taxonomy, value: taxonomy };
-    } );
-  }
   const placeholders = [];
   for ( let i = 0; i < posts_per_page; i++ ) {
     placeholders.push(i);
@@ -93,20 +151,29 @@ export default function Edit({ attributes, setAttributes }) {
    * On Change Functions
   */
   /** Query Settings */
-  const onChangePostType = (type) => {
-    setAttributes( { post_type: type } );
+  const onChangePostType = (newPostType) => {
+    const updatedPostType = registeredPostTypesFiltered.filter( (type) => type.slug === newPostType )[0] ?? { slug: newPostType };
+    setAttributes( { 
+      post_type: updatedPostType,
+      terms: []
+    } );
   };
-  const onChangeTaxonomy = (tax) => {
-    setAttributes( { taxonomy: tax } );
+  const onChangeTerms = (newTerms) => {
+    const hasNoSuggestions = newTerms.some((value) => typeof value === 'string' && !catSuggestions[value]);
+    if( hasNoSuggestions ) return;
+    const updatedCats = newTerms.map( (token) => {
+      return typeof token === "string" ? catSuggestions[token] : token;
+    } );
+    setAttributes( { terms: updatedCats } );
   }
   const onChangePostsPerPage = (number) => {
     setAttributes( { posts_per_page: number } );
   }
-  const onChangeOrder = (order) => {
-    setAttributes( { order: order } );
+  const onChangeOrder = (newOrder) => {
+    setAttributes( { order: newOrder } );
   }
-  const onChangeOrderBy = () => {
-    setAttributes( { orderby: orderby } );
+  const onChangeOrderBy = (newOrderBy) => {
+    setAttributes( { orderby: newOrderBy } );
   }
   /** Carousel Settings */
   const onChangeSlidesPerView = (number) => {
@@ -130,47 +197,61 @@ export default function Edit({ attributes, setAttributes }) {
   useEffect( () => {
     setAttributes( { blockID: _uniqueId() } );
   }, [] );
+  useEffect( () => {
+    terms.forEach(function(term, index) {
+      if( !term.slug ) {
+        const hasSuggestion = catSuggestions[term.value];
+        if( !hasSuggestion ) {
+          return;
+        }
+        let updatedTerms = [...terms];
+        updatedTerms[index] = catSuggestions[term.value];
+        setAttributes( { terms: updatedTerms } );
+      }
+    });
+  }, [catSuggestions] );
 	return (
 		<>
       <InspectorControls>
         <PanelBody title={ __( "Query Settings", "cth" ) }>
-          {!postTypesArray &&
-            <Spinner/>
-          }
-          {postTypesArray && 
-            <>
+          { registeredPostTypes
+            ?
               <SelectControl
                 label={__( "Post Type", "cth" )}
-                value={post_type}
+                value={post_type.slug}
                 onChange={onChangePostType}
-                options={postTypesArray}
+                options={postTypeOptions}
                 __nextHasNoMarginBottom
               />
-              {!currentPostTypeTaxonomies &&
-                <Spinner/>
-              }
-              {currentPostTypeTaxonomies &&
-                <SelectControl 
-                  label={__( "Taxonomy", "cth" )}
-                  value={taxonomy}
-                  onChange={onChangeTaxonomy}
-                  options={currentPostTypeTaxonomies}
-                  __nextHasNoMarginBottom
-                />
-              }
-            </>
+            :
+              <Spinner/>
           }
-          {postTypesArray && 
-            <QueryControls
-              numberOfItems={posts_per_page}
-              order={order}
-              orderBy={orderby}
-              onOrderChange={onChangeOrder}
-              onOrderByChange={onChangeOrderBy}
-              onNumberOfItemsChange={onChangePostsPerPage}
-              // categorySuggestions={postTypeTaxonomyArray}
-              // selectedCategories={terms}
-            />
+          {catSuggestions && !isEmpty(catSuggestions)
+            ?
+              <QueryControls
+                numberOfItems={posts_per_page}
+                order={order}
+                orderBy={orderby}
+                categorySuggestions={catSuggestions}
+                selectedCategories={terms}
+                onNumberOfItemsChange={onChangePostsPerPage}
+                onOrderChange={onChangeOrder}
+                onOrderByChange={onChangeOrderBy}
+                onCategoryChange={onChangeTerms}
+              />
+            :
+              isEmpty(catSuggestions) && isEmpty(allCats)
+              ?
+                <QueryControls
+                  numberOfItems={posts_per_page}
+                  order={order}
+                  orderBy={orderby}
+                  onNumberOfItemsChange={onChangePostsPerPage}
+                  onOrderChange={onChangeOrder}
+                  onOrderByChange={onChangeOrderBy}
+                />
+              :
+                <Spinner/>
           }
         </PanelBody>
         <PanelBody title={__( "Carousel Settings", "cth" )}>
@@ -229,8 +310,6 @@ export default function Edit({ attributes, setAttributes }) {
 				<Swiper 
           className="cth-post-carousel-list swiper-wrapper"
           modules={[A11y, Navigation, Pagination, Scrollbar]}
-          // onSwiper={(swiper) => console.log(swiper)}
-          // onSlideChange={() => console.log('slide change')}
           slidesPerView={slides_per_view}
           navigation={navigation ? { clickable: true } : navigation}
           pagination={dots ? { clickable: true } : dots}

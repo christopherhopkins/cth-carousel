@@ -4,25 +4,42 @@ function cth_carousel( $attributes ) {
     /**
      * Setup Query
     */
-    $blockID = $attributes['blockID'];
-    $post_type = $attributes['post_type'] ?? 'post';
-    $posts_per_page = $attributes['posts_per_page'] ?? 3;
-    $orderby = $attributes['orderby'] ?? 'date';
-    $order = $attributes['order'] ?? 'desc';
+    $blockID = $attributes["blockID"];
+    $post_type = $attributes["post_type"] ?? "post";
+    $posts_per_page = $attributes["posts_per_page"] ?? 3;
+    $orderby = $attributes["orderby"] ?? "date";
+    $order = $attributes["order"] ?? "desc";
     $args = array(
-        'post_type' => $post_type,
-        'posts_per_page' => $posts_per_page,
-        'orderby' => $orderby,
-        'order' => $order
+        "post_type" => $post_type['slug'],
+        "posts_per_page" => $posts_per_page,
+        "orderby" => $orderby,
+        "order" => $order,
+        "tax_query" => array(
+            "relation" => "OR"
+        )
     );
+    if( $attributes["terms"] ) {
+        // Build Tax Query
+        // TODO: support AND taxonomy relation
+        foreach( $attributes["terms"] as $term ) {
+            $taxonomy = $term["taxonomy"];
+            $id = $term["id"];
+            $tax_query_array = array(
+                "taxonomy" => $taxonomy,
+                "field" => "term_id",
+                "terms" => [$id],
+                "include_children" => false,
+                "operator" => "IN"
+            );
+            array_push($args["tax_query"], $tax_query_array);
+        }
+    }
     $posts = get_posts($args);
-    // var_dump($attributes);
     /**
      * Setup Output
     */
     ob_start();
     ?>
-    
     <div <?= get_block_wrapper_attributes(); ?>>
         <div 
             class="swiper" 
@@ -47,7 +64,6 @@ function cth_carousel( $attributes ) {
             <div class="swiper-scrollbar" data-id="<?= $blockID ?>"></div>
         </div>
     </div>
-
     <?php 
     $return = ob_get_clean();
     return $return;
