@@ -68,5 +68,6 @@ function cth_carousel( $attributes ) {
     </div>
     <?php
     $return = ob_get_clean();
+    wp_reset_postdata();
     return $return;
 }
