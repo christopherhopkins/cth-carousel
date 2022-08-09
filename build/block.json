@@ -24,29 +24,32 @@
       "type": "string",
       "default": "0"
     },
-    "posts_per_page": {
-      "type": "number",
-      "default": 3
-    },
-    "post_type": {
-      "type": "object",
-      "default": {
-        "slug": "post"
-      }
-    },
     "terms": {
       "type": "array",
       "items": {
         "type": "object"
       }
     },
-    "order": {
-      "type": "string",
-      "default": "desc"
-    },
-    "orderby": {
-      "type": "string",
-      "default": "date"
+    "query": {
+      "type": "object",
+      "default": {
+        "perPage": 1,
+        "pages": 1,
+        "offset": 0,
+        "postType": {
+          "slug": "post"
+        },
+        "order": "desc",
+        "orderBy": "date",
+        "author": "",
+        "search": "",
+        "exclude": [],
+        "sticky": false,
+        "taxRelation": "OR",
+        "_embed": true,
+        "taxQuery": null,
+        "status": "publish"
+      }
     },
     "slides_per_view": {
       "type": "number",
@@ -72,5 +75,8 @@
       "type": "number",
       "default": 30
     }
+  },
+  "providesContext": {
+    "query": "query"
   }
 }

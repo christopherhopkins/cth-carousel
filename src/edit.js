@@ -35,6 +35,8 @@ export default function Edit({ attributes, setAttributes }) {
     terms,
     order,
     orderby,
+    queryId,
+    query,
     slides_per_view,
     loop,
     navigation,
@@ -49,15 +51,18 @@ export default function Edit({ attributes, setAttributes }) {
   const posts = useSelect( // main query
     ( select ) => {
       const query_args = {
-        context: "view",
-        status: "publish",
-        per_page: posts_per_page,
-        _embed: true,
-        order: order,
-        orderby: orderby,
-        tax_relation: "OR"
+        page: query.pages,
+        per_page: query.perPage,
+        search: query.search,
+        author: query.author,
+        offset: query.offset,
+        order: query.order,
+        orderby: query.orderBy,
+        status: query.status,
+        tax_relation: query.taxRelation,
+        _embed: query._embed,
       };
-      if( terms.length > 0 ) {
+      if( !isEmpty(terms) ) {
         for(const term of terms) {
           switch( term.taxonomy ) {
             case "category":
@@ -86,8 +91,8 @@ export default function Edit({ attributes, setAttributes }) {
           }
         }
       }
-      return select("core").getEntityRecords("postType", post_type.slug, query_args );
-    }, [posts_per_page, order, orderby, terms, post_type]
+      return select("core").getEntityRecords("postType", query.postType.slug, query_args );
+    }, [query, terms] // change to just query
   );
   /**
   * Post Types
@@ -111,7 +116,7 @@ export default function Edit({ attributes, setAttributes }) {
   const allCats = useSelect(
     ( select ) => {
       const returnArray = [];
-      const postTypeObject = post_type.taxonomies ? post_type : registeredPostTypesFiltered.filter( (type) => type.slug === post_type.slug )[0];
+      const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter( (type) => type.slug === query.postType.slug )[0];
       if( postTypeObject ) {
         const postTypeTaxonomies = postTypeObject.taxonomies;
         if( postTypeTaxonomies ) {
@@ -126,7 +131,7 @@ export default function Edit({ attributes, setAttributes }) {
         }
       }
       return returnArray;
-    }, [post_type]
+    }, [query]
   );
   const catSuggestions = {};
   if( allCats ) {
@@ -138,7 +143,7 @@ export default function Edit({ attributes, setAttributes }) {
    * Utilities
   */
   const placeholders = [];
-  for ( let i = 0; i < posts_per_page; i++ ) {
+  for ( let i = 0; i < query.perPage; i++ ) {
     placeholders.push(i);
   }
   /**
@@ -147,10 +152,10 @@ export default function Edit({ attributes, setAttributes }) {
   /** Query Settings */
   const onChangePostType = (newPostType) => {
     const updatedPostType = registeredPostTypesFiltered.filter( (type) => type.slug === newPostType )[0] ?? { slug: newPostType };
-    setAttributes( { 
-      post_type: updatedPostType,
-      terms: [] // reset terms when changing post types
-    } );
+    const updatedQuery = {...query}
+    updatedQuery["postType"] = updatedPostType;
+    updatedQuery["terms"] = [];
+    setAttributes( { query: updatedQuery } );
   };
   const onChangeTerms = (newTerms) => {
     const hasNoSuggestions = newTerms.some((value) => typeof value === 'string' && !catSuggestions[value]);
@@ -161,16 +166,22 @@ export default function Edit({ attributes, setAttributes }) {
     setAttributes( { terms: updatedCats } );
   }
   const onChangePostsPerPage = (number) => {
-    setAttributes( { posts_per_page: number } );
-    if( number === 1 ) {
-      onChangeSlidesPerView(number); // make sure this doesn't get stuck on 2
+    const updatedQuery = {...query}
+    updatedQuery["perPage"] = number;
+    setAttributes( { query: updatedQuery } );
+    if( number === 1 || number <= slides_per_view ) {
+      onChangeSlidesPerView(number); // make sure this doesn't get stuck
     }
   }
   const onChangeOrder = (newOrder) => {
-    setAttributes( { order: newOrder } );
+    const updatedQuery = {...query}
+    updatedQuery["order"] = newOrder;
+    setAttributes( { query: updatedQuery } );
   }
   const onChangeOrderBy = (newOrderBy) => {
-    setAttributes( { orderby: newOrderBy } );
+    const updatedQuery = {...query}
+    updatedQuery["orderBy"] = newOrderBy;
+    setAttributes( { query: updatedQuery } );
   }
   /** Carousel Settings */
   const onChangeSlidesPerView = (number) => {
@@ -201,17 +212,19 @@ export default function Edit({ attributes, setAttributes }) {
     setAttributes( { blockID: _uniqueId() } );
   }, [] );
   useEffect( () => { // ensure actual term objects are set in attributes
-    terms.forEach(function(term, index) {
-      if( !term.slug ) {
-        const hasSuggestion = catSuggestions[term.value];
-        if( !hasSuggestion ) {
-          return;
+    if( !isEmpty(terms) ) {
+      terms.forEach(function(term, index) {
+        if( !term.slug ) {
+          const hasSuggestion = catSuggestions[term.value];
+          if( !hasSuggestion ) {
+            return;
+          }
+          let updatedTerms = [...terms];
+          updatedTerms[index] = catSuggestions[term.value];
+          setAttributes( { terms: updatedTerms } );
         }
-        let updatedTerms = [...terms];
-        updatedTerms[index] = catSuggestions[term.value];
-        setAttributes( { terms: updatedTerms } );
-      }
-    });
+      });
+    }
   }, [catSuggestions] );
 	return (
 		<>
@@ -221,7 +234,7 @@ export default function Edit({ attributes, setAttributes }) {
             ?
               <SelectControl
                 label={__( "Post Type", "cth" )}
-                value={post_type.slug}
+                value={query.postType.slug}
                 onChange={onChangePostType}
                 options={postTypeOptions}
                 __nextHasNoMarginBottom
@@ -232,9 +245,9 @@ export default function Edit({ attributes, setAttributes }) {
           {catSuggestions && !isEmpty(catSuggestions)
             ?
               <QueryControls
-                numberOfItems={posts_per_page}
-                order={order}
-                orderBy={orderby}
+                numberOfItems={query.perPage}
+                order={query.order}
+                orderBy={query.orderBy}
                 categorySuggestions={catSuggestions}
                 selectedCategories={terms}
                 onNumberOfItemsChange={onChangePostsPerPage}
@@ -246,9 +259,9 @@ export default function Edit({ attributes, setAttributes }) {
               isEmpty(catSuggestions) && isEmpty(allCats)
               ?
                 <QueryControls
-                  numberOfItems={posts_per_page}
-                  order={order}
-                  orderBy={orderby}
+                  numberOfItems={query.perPage}
+                  order={query.order}
+                  orderBy={query.orderBy}
                   onNumberOfItemsChange={onChangePostsPerPage}
                   onOrderChange={onChangeOrder}
                   onOrderByChange={onChangeOrderBy}
@@ -263,7 +276,7 @@ export default function Edit({ attributes, setAttributes }) {
             value={slides_per_view}
             onChange={onChangeSlidesPerView}
             min={1}
-            max={posts_per_page}
+            max={query.perPage}
           />
           {slides_per_view > 1 &&
             <RangeControl
@@ -321,7 +334,7 @@ export default function Edit({ attributes, setAttributes }) {
 			<div { ...useBlockProps()}>
         {posts
           ?
-            <Swiper 
+            <Swiper
               className="cth-post-carousel-list swiper-wrapper"
               modules={[A11y, Navigation, Pagination, Scrollbar]}
               slidesPerView={slides_per_view}

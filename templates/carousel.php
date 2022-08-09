@@ -5,20 +5,21 @@ function cth_carousel( $attributes ) {
      * Setup Query
     */
     $blockID = $attributes["blockID"];
-    $post_type = $attributes["post_type"] ?? "post";
-    $posts_per_page = $attributes["posts_per_page"];
-    $orderby = $attributes["orderby"] ?? "date";
-    $order = $attributes["order"] ?? "desc";
+    $post_type = $attributes["query"]["postType"]["slug"] ?? "post";
+    $posts_per_page = $attributes["query"]["perPage"];
+    $orderby = $attributes["query"]["orderBy"] ?? "date";
+    $order = $attributes["query"]["order"] ?? "desc";
+    $tax_relation = $attributes["query"]["taxRelation"] ?? "OR";
     $args = array(
-        "post_type" => $post_type['slug'],
+        "post_type" => $post_type,
         "posts_per_page" => $posts_per_page,
         "orderby" => $orderby,
         "order" => $order,
-        "tax_query" => array(
-            "relation" => "OR"
-        )
     );
-    if( $attributes["terms"] ) {
+    if( !empty($attributes["terms"]) ) {
+        $args["tax_query"] = array(
+            "relation" => $tax_relation
+        );
         // Build Tax Query
         // TODO: support AND taxonomy relation
         foreach( $attributes["terms"] as $term ) {
@@ -41,10 +42,10 @@ function cth_carousel( $attributes ) {
     ob_start();
     ?>
     <div <?= get_block_wrapper_attributes(); ?>>
-        <div 
-            class="swiper" 
-            data-navigation="true" 
-            data-scrollbar="true" 
+        <div
+            class="swiper"
+            data-navigation="true"
+            data-scrollbar="true"
             data-pagination="true"
             data-slides-per-view="<?= $attributes["slides_per_view"]; ?>"
             data-id="<?= $blockID; ?>"
@@ -65,7 +66,7 @@ function cth_carousel( $attributes ) {
             <div class="swiper-scrollbar" data-id="<?= $blockID ?>"></div>
         </div>
     </div>
-    <?php 
+    <?php
     $return = ob_get_clean();
     return $return;
 }
