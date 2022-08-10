@@ -13098,6 +13098,7 @@ if (cthBlocksCarousels) {
     const carousel = element;
     const swiperEl = carousel.querySelector(".swiper");
     const blockID = swiperEl.getAttribute("data-id");
+    console.log(blockID);
     const slidesPerView = swiperEl.getAttribute('data-slides-per-view');
     const loop = swiperEl.getAttribute('data-loop');
     const slideGap = swiperEl.getAttribute('data-slide-gap'); // Set up interactive elements
@@ -13107,24 +13108,12 @@ if (cthBlocksCarousels) {
     const scrollbarEl = `.swiper-scrollbar[data-id="${blockID}"]`;
     const paginationEl = `.swiper-pagination[data-id="${blockID}"]`; // set up default modules always included
 
-    let initModules = [swiper__WEBPACK_IMPORTED_MODULE_0__.A11y];
-
-    if (swiperEl.getAttribute("data-pagination")) {
-      initModules.push(swiper__WEBPACK_IMPORTED_MODULE_0__.Pagination);
-    }
-
-    if (swiperEl.getAttribute("data-scrollbar")) {
-      initModules.push(swiper__WEBPACK_IMPORTED_MODULE_0__.Scrollbar);
-    }
-
-    if (swiperEl.getAttribute("data-navigation")) {
-      initModules.push(swiper__WEBPACK_IMPORTED_MODULE_0__.Navigation);
-    }
-
-    const swiper = new swiper__WEBPACK_IMPORTED_MODULE_0__.Swiper(swiperEl, {
-      modules: initModules,
+    const swiper = new swiper__WEBPACK_IMPORTED_MODULE_0__["default"](swiperEl, {
+      modules: [swiper__WEBPACK_IMPORTED_MODULE_0__.A11y, swiper__WEBPACK_IMPORTED_MODULE_0__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_0__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_0__.Scrollbar],
       slidesPerView: slidesPerView,
-      // autoHeight: true,
+      // slidesPerView: "auto",
+      autoHeight: true,
+      rewind: true,
       a11y: {
         // https://swiperjs.com/swiper-api#accessibility-a11y
         enabled: true
@@ -13141,8 +13130,13 @@ if (cthBlocksCarousels) {
         el: paginationEl,
         type: "bullets"
       },
-      loop: loop,
-      spaceBetween: slideGap
+      grid: {
+        fill: "row",
+        rows: 1
+      },
+      // spaceBetween: slideGap,
+      // loopFillGroupWithBlank: false
+      cssMode: true
     });
   });
 }

@@ -73,10 +73,7 @@
     },
     "slide_gap": {
       "type": "number",
-      "default": 30
+      "default": 0
     }
-  },
-  "providesContext": {
-    "query": "query"
   }
 }

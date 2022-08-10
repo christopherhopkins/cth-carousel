@@ -1,5 +1,5 @@
 // Import all possible module options
-import { Swiper, Navigation, Pagination, Scrollbar, A11y } from "swiper";
+import Swiper, { Navigation, Pagination, Scrollbar, A11y } from "swiper";
 
 const cthBlocksCarousels = document.querySelectorAll(".wp-block-cth-blocks-cth-post-carousel");
 if( cthBlocksCarousels ) {
@@ -7,6 +7,7 @@ if( cthBlocksCarousels ) {
     const carousel = element;
     const swiperEl = carousel.querySelector(".swiper");
     const blockID = swiperEl.getAttribute("data-id");
+    console.log(blockID);
     const slidesPerView = swiperEl.getAttribute('data-slides-per-view');
     const loop = swiperEl.getAttribute('data-loop');
     const slideGap = swiperEl.getAttribute('data-slide-gap');
@@ -16,20 +17,13 @@ if( cthBlocksCarousels ) {
     const scrollbarEl = `.swiper-scrollbar[data-id="${blockID}"]`;
     const paginationEl = `.swiper-pagination[data-id="${blockID}"]`;
     // set up default modules always included
-    let initModules = [A11y];
-    if( swiperEl.getAttribute("data-pagination") ) {
-      initModules.push(Pagination);
-    }
-    if( swiperEl.getAttribute("data-scrollbar") ) {
-      initModules.push(Scrollbar);
-    }
-    if( swiperEl.getAttribute("data-navigation") ) {
-      initModules.push(Navigation);
-    }
+
     const swiper = new Swiper(swiperEl, {
-      modules: initModules,
+      modules: [A11y, Navigation, Pagination, Scrollbar],
       slidesPerView: slidesPerView,
-      // autoHeight: true,
+      // slidesPerView: "auto",
+      autoHeight: true,
+      rewind: true,
       a11y: { // https://swiperjs.com/swiper-api#accessibility-a11y
         enabled: true
       },
@@ -45,8 +39,13 @@ if( cthBlocksCarousels ) {
         el: paginationEl,
         type: "bullets"
       },
-      loop: loop,
-      spaceBetween: slideGap
+      grid: {
+        fill: "row",
+        rows: 1
+      },
+      // spaceBetween: slideGap,
+      // loopFillGroupWithBlank: false
+      cssMode: true
     });
   } );
 }

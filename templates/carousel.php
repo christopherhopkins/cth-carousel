@@ -44,9 +44,9 @@ function cth_carousel( $attributes ) {
     <div <?= get_block_wrapper_attributes(); ?>>
         <div
             class="swiper"
-            data-navigation="true"
-            data-scrollbar="true"
-            data-pagination="true"
+            data-navigation="false"
+            data-scrollbar="false"
+            data-pagination="false"
             data-slides-per-view="<?= $attributes["slides_per_view"]; ?>"
             data-id="<?= $blockID; ?>"
             data-loop="<?= $attributes["loop"]; ?>"
@@ -55,8 +55,12 @@ function cth_carousel( $attributes ) {
             <div class="swiper-wrapper">
                 <?php foreach($posts as $post) : ?>
                     <div class="swiper-slide">
-                        <h3><?= get_the_title($post); ?></h3>
-                        <p><?= get_the_excerpt($post); ?></p>
+                        <div class="swiper-slide-inner">
+                            <div class="swiper-slide-inner-wrapper">
+                                <h3><?= get_the_title($post); ?></h3>
+                                <p><?= get_the_excerpt($post); ?></p>
+                            </div>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -68,6 +72,5 @@ function cth_carousel( $attributes ) {
     </div>
     <?php
     $return = ob_get_clean();
-    wp_reset_postdata();
     return $return;
 }
