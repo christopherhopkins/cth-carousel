@@ -30,12 +30,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 export default function Edit({ attributes, setAttributes }) {
   const {
     blockID,
-    posts_per_page,
-    post_type,
     terms,
-    order,
-    orderby,
-    queryId,
     query,
     slides_per_view,
     loop,

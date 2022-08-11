@@ -45,7 +45,7 @@ if( cthBlocksCarousels ) {
       },
       // spaceBetween: slideGap,
       // loopFillGroupWithBlank: false
-      cssMode: true
+      // cssMode: true
     });
   } );
 }

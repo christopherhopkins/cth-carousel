@@ -51,12 +51,7 @@ function Edit(_ref) {
   } = _ref;
   const {
     blockID,
-    posts_per_page,
-    post_type,
     terms,
-    order,
-    orderby,
-    queryId,
     query,
     slides_per_view,
     loop,

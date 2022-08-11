@@ -13133,10 +13133,10 @@ if (cthBlocksCarousels) {
       grid: {
         fill: "row",
         rows: 1
-      },
-      // spaceBetween: slideGap,
+      } // spaceBetween: slideGap,
       // loopFillGroupWithBlank: false
-      cssMode: true
+      // cssMode: true
+
     });
   });
 }
