@@ -23,7 +23,7 @@
 require_once __DIR__ . '/templates/carousel.php';
 function cth_blocks_cth_post_carousel_block_init() {
 	register_block_type( __DIR__ . '/build', array(
-		'render_callback' => 'cth_carousel'
+		'render_callback' => 'render_cth_carousel_block_template'
 	) );
 }
 add_action( 'init', 'cth_blocks_cth_post_carousel_block_init' );

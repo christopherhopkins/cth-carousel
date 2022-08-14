@@ -7,7 +7,6 @@ if( cthBlocksCarousels ) {
     const carousel = element;
     const swiperEl = carousel.querySelector(".swiper");
     const blockID = swiperEl.getAttribute("data-id");
-    console.log(blockID);
     const slidesPerView = swiperEl.getAttribute('data-slides-per-view');
     const loop = swiperEl.getAttribute('data-loop');
     const slideGap = swiperEl.getAttribute('data-slide-gap');
@@ -38,14 +37,8 @@ if( cthBlocksCarousels ) {
       pagination: {
         el: paginationEl,
         type: "bullets"
-      },
-      grid: {
-        fill: "row",
-        rows: 1
-      },
-      // spaceBetween: slideGap,
-      // loopFillGroupWithBlank: false
-      // cssMode: true
+      }
     });
+    console.log(swiper);
   } );
 }

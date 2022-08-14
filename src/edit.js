@@ -1,7 +1,12 @@
+// https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/query/edit/inspector-controls/order-control.js
+// https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/post-template/edit.js
 import { __ } from '@wordpress/i18n';
 import {
   useBlockProps,
-  InspectorControls
+  InspectorControls,
+  BlockContextProvider,
+  __experimentalUseBlockPreview as useBlockPreview,
+  useInnerBlocksProps
 } from '@wordpress/block-editor';
 import { useSelect } from '@wordpress/data';
 import {
@@ -9,15 +14,16 @@ import {
   PanelBody,
   ToggleControl,
   QueryControls,
-  Card,
-  CardHeader,
-  CardBody,
   RangeControl,
   SelectControl,
-  __experimentalHeading as Header,
   __experimentalGrid as Grid,
 } from "@wordpress/components";
-import { useEffect, RawHTML } from "@wordpress/element";
+import {
+  useEffect,
+  memo,
+  useMemo,
+  useState
+} from "@wordpress/element";
 import isEmpty from "lodash/isEmpty";
 import _uniqueId from "lodash/uniqueId";
 import './editor.scss';
@@ -27,7 +33,53 @@ import './editor.scss';
 import { Navigation, Pagination, Scrollbar, A11y } from 'swiper';
 import { Swiper, SwiperSlide } from "swiper/react";
 
-export default function Edit({ attributes, setAttributes }) {
+const TEMPLATE = [
+	[ 'core/post-title' ],
+	[ 'core/post-date' ],
+	[ 'core/post-excerpt' ],
+];
+
+const CarouselPostInnerBlocks = () => {
+  const innerBlockProps = useInnerBlocksProps(
+    { className: 'wp-block-post' },
+    { template: TEMPLATE }
+  );
+  return <div {...innerBlockProps}></div>;
+}
+
+function CarouselPostBlockPreview( {
+	blocks,
+	blockContextId,
+	isHidden,
+	setActiveBlockContextId,
+} ) {
+	const blockPreviewProps = useBlockPreview( {
+		blocks,
+		props: {
+			className: 'wp-block-post',
+		},
+	} );
+	const handleOnClick = () => {
+		setActiveBlockContextId( blockContextId );
+	};
+	const style = {
+		display: isHidden ? 'none' : undefined,
+	};
+	return (
+		<li
+			{ ...blockPreviewProps }
+			tabIndex={ 0 }
+			// eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
+			role="button"
+			onClick={ handleOnClick }
+			onKeyPress={ handleOnClick }
+			style={ style }
+		/>
+	);
+}
+const MemorizedCarouselPostBlockPreview = memo( CarouselPostBlockPreview );
+
+export default function Edit({ attributes, setAttributes, clientId }) {
   const {
     blockID,
     terms,
@@ -39,11 +91,28 @@ export default function Edit({ attributes, setAttributes }) {
     scrollbar,
     slide_gap
   } = attributes;
+  const [ activeBlockContextId, setActiveBlockContextId ] = useState();
+  /**
+  * Post Types
+  */
+   let postTypeOptions = [];
+   let registeredPostTypesFiltered = [];
+   const registeredPostTypes = useSelect( // get All post types
+     ( select ) => {
+       return select("core").getPostTypes();
+     }, [] // run on render, this won't change
+   );
+   if( registeredPostTypes ) {
+     registeredPostTypesFiltered = registeredPostTypes.filter(pt => pt.viewable && pt.visibility.show_in_nav_menus);
+     postTypeOptions = registeredPostTypesFiltered.map( (t) => {
+       return { label: t.name, value: t.slug };
+     } );
+   }
   /**
    * Posts (Main Query for Rendering)
    * TODO: Support AND tax relation
   */
-  const posts = useSelect( // main query
+  const { posts, blocks, allCats } = useSelect( // main query
     ( select ) => {
       const query_args = {
         page: query.pages,
@@ -86,30 +155,6 @@ export default function Edit({ attributes, setAttributes }) {
           }
         }
       }
-      return select("core").getEntityRecords("postType", query.postType.slug, query_args );
-    }, [query, terms] // change to just query
-  );
-  /**
-  * Post Types
-  */
-  let postTypeOptions = [];
-  let registeredPostTypesFiltered = [];
-  const registeredPostTypes = useSelect( // get All post types
-    ( select ) => {
-      return select("core").getPostTypes();
-    }, [] // run on render, this won't change
-  );
-  if( registeredPostTypes ) {
-    registeredPostTypesFiltered = registeredPostTypes.filter(pt => pt.viewable && pt.visibility.show_in_nav_menus);
-    postTypeOptions = registeredPostTypesFiltered.map( (t) => {
-      return { label: t.name, value: t.slug };
-    } );
-  }
-  /**
-   * Taxonomy Terms
-  */
-  const allCats = useSelect(
-    ( select ) => {
       const returnArray = [];
       const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter( (type) => type.slug === query.postType.slug )[0];
       if( postTypeObject ) {
@@ -125,9 +170,37 @@ export default function Edit({ attributes, setAttributes }) {
           }
         }
       }
-      return returnArray;
-    }, [query]
+      return {
+        posts: select("core").getEntityRecords("postType", query.postType.slug, query_args ),
+        blocks: select("core/block-editor").getBlocks( clientId ),
+        allCats: returnArray
+      }
+    }, [query, terms]
   );
+
+  /**
+   * Taxonomy Terms
+  */
+  // const allCats = useSelect(
+  //   ( select ) => {
+  //     const returnArray = [];
+  //     const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter( (type) => type.slug === query.postType.slug )[0];
+  //     if( postTypeObject ) {
+  //       const postTypeTaxonomies = postTypeObject.taxonomies;
+  //       if( postTypeTaxonomies ) {
+  //         for(const tax of postTypeTaxonomies) {
+  //           const taxTerms = select("core").getEntityRecords("taxonomy", tax, { per_page: -1 });
+  //           if( taxTerms ) {
+  //             for(const term of taxTerms) {
+  //               returnArray.push(term);
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //     return returnArray;
+  //   }, [query]
+  // );
   const catSuggestions = {};
   if( allCats ) {
     for(const cat of allCats) {
@@ -221,6 +294,15 @@ export default function Edit({ attributes, setAttributes }) {
       });
     }
   }, [catSuggestions] );
+
+  const blockContexts = useMemo(
+		() =>
+			posts?.map( ( post ) => ( {
+				postType: post.type,
+				postId: post.id,
+			} ) ),
+		[ posts ]
+	);
 	return (
 		<>
       <InspectorControls>
@@ -327,8 +409,8 @@ export default function Edit({ attributes, setAttributes }) {
         </PanelBody>
       </InspectorControls>
 			<div { ...useBlockProps()}>
-        {posts
-          ?
+        {blockContexts &&
+          <>
             <Swiper
               className="cth-post-carousel-list swiper-wrapper"
               modules={[A11y, Navigation, Pagination, Scrollbar]}
@@ -339,33 +421,43 @@ export default function Edit({ attributes, setAttributes }) {
               loop={loop}
               noSwipingSelector="[data-wp-component='Card']"
               spaceBetween={slide_gap}
+              autoHeight={true}
             >
-              { posts.map( ( post ) => {
-                return(
-                  <SwiperSlide key={post.id}>
-                    <Card>
-                      <CardHeader>
-                        { post.title.rendered ? (
-                          <Header size={3}>
-                            { post.title.rendered }
-                          </Header>
-                        ) : (
-                          __( "No Title", "cth" )
-                        ) }
-                      </CardHeader>
-                      <CardBody>
-                        {post.excerpt.rendered && <RawHTML>{__(post.excerpt.rendered, "cth")}</RawHTML>}
-                      </CardBody>
-                    </Card>
-                  </SwiperSlide>
-                );
-              } ) }
+              <div className="swiper-wrapper">
+                {blockContexts &&
+                  blockContexts.map( ( blockContext ) => {
+                    return(
+                      <BlockContextProvider key={blockContext.postId} value={blockContext}>
+                        <div className="swiper-slide">
+                          { blockContext.postId ===
+                          ( activeBlockContextId ||
+                            blockContexts[ 0 ]?.postId ) ? (
+                              <CarouselPostInnerBlocks />
+                          ) : null }
+                          <MemorizedCarouselPostBlockPreview
+                            blocks={ blocks }
+                            blockContextId={ blockContext.postId }
+                            setActiveBlockContextId={ setActiveBlockContextId }
+                            isHidden={
+                              blockContext.postId ===
+                              ( activeBlockContextId ||
+                                blockContexts[ 0 ]?.postId )
+                            }
+                          />
+                        </div>
+                      </BlockContextProvider>
+                    );
+                  } )
+                }
+              </div>
             </Swiper>
-          :
-            <div className="posts-loading">
-              <Spinner />
-              <p>Loading...</p>
-            </div>
+          </>
+        }
+        {!blockContexts &&
+          <div className="posts-loading">
+            <Spinner />
+            <p>Loading...</p>
+          </div>
         }
 			</div>
 		</>
