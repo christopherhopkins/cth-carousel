@@ -11,12 +11,30 @@
 @import "swiper/css/pagination";
 @import "swiper/css/scrollbar";
 
+:root {
+	--cth-carousel--pagination-height: var(--wp--custom--typography--line-height--normal, 28px);
+}
+
 .wp-block-cth-blocks-cth-post-carousel {
 	padding-top: 30px;
-	.cth-post-carousel-list {
-		list-style: none;
-		list-style-type: none;
-		padding: 0;
-		margin: 0;
+	.swiper {
+		.swiper-wrapper {
+			padding-bottom: var(--cth-carousel--pagination-height);
+		}
+	}
+	.swiper-pagination {
+		line-height: var(--cth-carousel--pagination-height);
+		height: var(--cth-carousel--pagination-height);
+	}
+	.swiper-button-next,
+	.swiper-button-prev {
+		background: none;
+		border: none;
+	}
+	.swiper-button-next {
+		right: 0;
+	}
+	.swiper-button-prev {
+		left: 0;
 	}
 }

@@ -13100,37 +13100,59 @@ if (cthBlocksCarousels) {
     const blockID = swiperEl.getAttribute("data-id");
     const slidesPerView = swiperEl.getAttribute('data-slides-per-view');
     const loop = swiperEl.getAttribute('data-loop');
-    const slideGap = swiperEl.getAttribute('data-slide-gap'); // Set up interactive elements
+    const slideGap = swiperEl.getAttribute('data-slide-gap');
+    const pagination = swiperEl.getAttribute("data-pagination");
+    const navigation = swiperEl.getAttribute("data-navigation");
+    const scrollbar = swiperEl.getAttribute("data-scrollbar"); // Set up interactive elements
 
     const nextEl = `.swiper-button-next[data-id="${blockID}"]`;
     const prevEl = `.swiper-button-prev[data-id="${blockID}"]`;
     const scrollbarEl = `.swiper-scrollbar[data-id="${blockID}"]`;
     const paginationEl = `.swiper-pagination[data-id="${blockID}"]`; // set up default modules always included
 
-    const swiper = new swiper__WEBPACK_IMPORTED_MODULE_0__["default"](swiperEl, {
-      modules: [swiper__WEBPACK_IMPORTED_MODULE_0__.A11y, swiper__WEBPACK_IMPORTED_MODULE_0__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_0__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_0__.Scrollbar],
+    const initArgs = {
+      modules: [swiper__WEBPACK_IMPORTED_MODULE_0__.A11y, swiper__WEBPACK_IMPORTED_MODULE_0__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_0__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_0__.Scrollbar, swiper__WEBPACK_IMPORTED_MODULE_0__.Keyboard],
       slidesPerView: slidesPerView,
-      // slidesPerView: "auto",
       autoHeight: true,
-      rewind: true,
       a11y: {
         // https://swiperjs.com/swiper-api#accessibility-a11y
         enabled: true
       },
-      navigation: {
+      keyboard: true
+    };
+
+    if (slideGap) {
+      initArgs.spaceBetween = parseInt(slideGap);
+    }
+
+    if (pagination) {
+      initArgs.pagination = {
+        el: paginationEl,
+        type: "bullets",
+        clickable: true
+      };
+    }
+
+    if (navigation) {
+      initArgs.navigation = {
         nextEl: nextEl,
-        prevEl: prevEl
-      },
-      scrollbar: {
+        prevEl: prevEl,
+        clickable: true
+      };
+    }
+
+    if (loop) {
+      initArgs.rewind = loop;
+    }
+
+    if (scrollbar) {
+      initArgs.scrollbar = {
         el: scrollbarEl,
         draggable: true
-      },
-      pagination: {
-        el: paginationEl,
-        type: "bullets"
-      }
-    });
-    console.log(swiper);
+      };
+    }
+
+    const swiper = new swiper__WEBPACK_IMPORTED_MODULE_0__["default"](swiperEl, initArgs);
   });
 }
 })();

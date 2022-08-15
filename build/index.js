@@ -55,6 +55,8 @@ const CarouselPostInnerBlocks = () => {
     className: 'wp-block-post'
   }, {
     template: TEMPLATE
+  }, {
+    templateLock: 'all'
   });
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", innerBlockProps);
 };
@@ -80,7 +82,7 @@ function CarouselPostBlockPreview(_ref) {
   const style = {
     display: isHidden ? 'none' : undefined
   };
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("li", (0,_babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, blockPreviewProps, {
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", (0,_babel_runtime_helpers_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, blockPreviewProps, {
     tabIndex: 0 // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
     ,
     role: "button",
@@ -138,8 +140,7 @@ function Edit(_ref2) {
 
   const {
     posts,
-    blocks,
-    allCats
+    blocks
   } = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)( // main query
   select => {
     const query_args = {
@@ -190,6 +191,16 @@ function Edit(_ref2) {
       }
     }
 
+    return {
+      posts: select("core").getEntityRecords("postType", query.postType.slug, query_args),
+      blocks: select("core/block-editor").getBlocks(clientId)
+    };
+  }, [query, terms]);
+  /**
+   * Taxonomy Terms
+  */
+
+  const allCats = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_4__.useSelect)(select => {
     const returnArray = [];
     const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter(type => type.slug === query.postType.slug)[0];
 
@@ -211,36 +222,8 @@ function Edit(_ref2) {
       }
     }
 
-    return {
-      posts: select("core").getEntityRecords("postType", query.postType.slug, query_args),
-      blocks: select("core/block-editor").getBlocks(clientId),
-      allCats: returnArray
-    };
-  }, [query, terms]);
-  /**
-   * Taxonomy Terms
-  */
-  // const allCats = useSelect(
-  //   ( select ) => {
-  //     const returnArray = [];
-  //     const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter( (type) => type.slug === query.postType.slug )[0];
-  //     if( postTypeObject ) {
-  //       const postTypeTaxonomies = postTypeObject.taxonomies;
-  //       if( postTypeTaxonomies ) {
-  //         for(const tax of postTypeTaxonomies) {
-  //           const taxTerms = select("core").getEntityRecords("taxonomy", tax, { per_page: -1 });
-  //           if( taxTerms ) {
-  //             for(const term of taxTerms) {
-  //               returnArray.push(term);
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //     return returnArray;
-  //   }, [query]
-  // );
-
+    return returnArray;
+  }, [query]);
   const catSuggestions = {};
 
   if (allCats) {
@@ -463,8 +446,7 @@ function Edit(_ref2) {
     checked: scrollbar,
     onChange: onChangeScrollbar
   })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.useBlockProps)(), blockContexts && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_10__.Swiper, {
-    className: "cth-post-carousel-list swiper-wrapper",
-    modules: [swiper__WEBPACK_IMPORTED_MODULE_9__.A11y, swiper__WEBPACK_IMPORTED_MODULE_9__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_9__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_9__.Scrollbar],
+    modules: [swiper__WEBPACK_IMPORTED_MODULE_9__.A11y, swiper__WEBPACK_IMPORTED_MODULE_9__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_9__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_9__.Scrollbar, swiper__WEBPACK_IMPORTED_MODULE_9__.Keyboard],
     slidesPerView: slides_per_view,
     navigation: navigation ? {
       clickable: true
@@ -476,19 +458,17 @@ function Edit(_ref2) {
       draggable: true
     } : scrollbar,
     loop: loop,
-    noSwipingSelector: "[data-wp-component='Card']",
     spaceBetween: slide_gap,
-    autoHeight: true
+    autoHeight: true,
+    keyboard: true
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
-    className: "swiper-wrapper"
+    class: "swiper-wrapper"
   }, blockContexts && blockContexts.map(blockContext => {
     var _blockContexts$, _blockContexts$2;
 
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.BlockContextProvider, {
+    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_10__.SwiperSlide, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.BlockContextProvider, {
       key: blockContext.postId,
       value: blockContext
-    }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
-      className: "swiper-slide"
     }, blockContext.postId === (activeBlockContextId || ((_blockContexts$ = blockContexts[0]) === null || _blockContexts$ === void 0 ? void 0 : _blockContexts$.postId)) ? (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(CarouselPostInnerBlocks, null) : null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(MemorizedCarouselPostBlockPreview, {
       blocks: blocks,
       blockContextId: blockContext.postId,

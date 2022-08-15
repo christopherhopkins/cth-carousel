@@ -30,7 +30,7 @@ import './editor.scss';
 /**
  * Swiper
 */
-import { Navigation, Pagination, Scrollbar, A11y } from 'swiper';
+import { Navigation, Pagination, Scrollbar, A11y, Keyboard } from 'swiper';
 import { Swiper, SwiperSlide } from "swiper/react";
 
 const TEMPLATE = [
@@ -42,9 +42,12 @@ const TEMPLATE = [
 const CarouselPostInnerBlocks = () => {
   const innerBlockProps = useInnerBlocksProps(
     { className: 'wp-block-post' },
-    { template: TEMPLATE }
+    { template: TEMPLATE },
+    { templateLock: 'all' }
   );
-  return <div {...innerBlockProps}></div>;
+  return (
+    <div {...innerBlockProps}></div>
+  );
 }
 
 function CarouselPostBlockPreview( {
@@ -66,15 +69,15 @@ function CarouselPostBlockPreview( {
 		display: isHidden ? 'none' : undefined,
 	};
 	return (
-		<li
-			{ ...blockPreviewProps }
-			tabIndex={ 0 }
-			// eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
-			role="button"
-			onClick={ handleOnClick }
-			onKeyPress={ handleOnClick }
-			style={ style }
-		/>
+    <div
+      { ...blockPreviewProps }
+      tabIndex={ 0 }
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
+      role="button"
+      onClick={ handleOnClick }
+      onKeyPress={ handleOnClick }
+      style={ style }
+    />
 	);
 }
 const MemorizedCarouselPostBlockPreview = memo( CarouselPostBlockPreview );
@@ -112,7 +115,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
    * Posts (Main Query for Rendering)
    * TODO: Support AND tax relation
   */
-  const { posts, blocks, allCats } = useSelect( // main query
+  const { posts, blocks } = useSelect( // main query
     ( select ) => {
       const query_args = {
         page: query.pages,
@@ -155,6 +158,19 @@ export default function Edit({ attributes, setAttributes, clientId }) {
           }
         }
       }
+
+      return {
+        posts: select("core").getEntityRecords("postType", query.postType.slug, query_args ),
+        blocks: select("core/block-editor").getBlocks( clientId )
+      }
+    }, [query, terms]
+  );
+
+  /**
+   * Taxonomy Terms
+  */
+  const allCats = useSelect(
+    (select) => {
       const returnArray = [];
       const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter( (type) => type.slug === query.postType.slug )[0];
       if( postTypeObject ) {
@@ -170,37 +186,9 @@ export default function Edit({ attributes, setAttributes, clientId }) {
           }
         }
       }
-      return {
-        posts: select("core").getEntityRecords("postType", query.postType.slug, query_args ),
-        blocks: select("core/block-editor").getBlocks( clientId ),
-        allCats: returnArray
-      }
-    }, [query, terms]
+      return returnArray;
+    }, [query]
   );
-
-  /**
-   * Taxonomy Terms
-  */
-  // const allCats = useSelect(
-  //   ( select ) => {
-  //     const returnArray = [];
-  //     const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter( (type) => type.slug === query.postType.slug )[0];
-  //     if( postTypeObject ) {
-  //       const postTypeTaxonomies = postTypeObject.taxonomies;
-  //       if( postTypeTaxonomies ) {
-  //         for(const tax of postTypeTaxonomies) {
-  //           const taxTerms = select("core").getEntityRecords("taxonomy", tax, { per_page: -1 });
-  //           if( taxTerms ) {
-  //             for(const term of taxTerms) {
-  //               returnArray.push(term);
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //     return returnArray;
-  //   }, [query]
-  // );
   const catSuggestions = {};
   if( allCats ) {
     for(const cat of allCats) {
@@ -412,23 +400,22 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         {blockContexts &&
           <>
             <Swiper
-              className="cth-post-carousel-list swiper-wrapper"
-              modules={[A11y, Navigation, Pagination, Scrollbar]}
+              modules={[A11y, Navigation, Pagination, Scrollbar, Keyboard]}
               slidesPerView={slides_per_view}
               navigation={navigation ? { clickable: true } : navigation}
               pagination={dots ? { clickable: true } : dots}
               scrollbar={scrollbar ? { draggable: true } : scrollbar}
               loop={loop}
-              noSwipingSelector="[data-wp-component='Card']"
               spaceBetween={slide_gap}
               autoHeight={true}
+              keyboard={true}
             >
-              <div className="swiper-wrapper">
+              <div class="swiper-wrapper">
                 {blockContexts &&
                   blockContexts.map( ( blockContext ) => {
                     return(
-                      <BlockContextProvider key={blockContext.postId} value={blockContext}>
-                        <div className="swiper-slide">
+                      <SwiperSlide>
+                        <BlockContextProvider key={blockContext.postId} value={blockContext}>
                           { blockContext.postId ===
                           ( activeBlockContextId ||
                             blockContexts[ 0 ]?.postId ) ? (
@@ -444,8 +431,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
                                 blockContexts[ 0 ]?.postId )
                             }
                           />
-                        </div>
-                      </BlockContextProvider>
+                        </BlockContextProvider>
+                      </SwiperSlide>
                     );
                   } )
                 }

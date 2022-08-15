@@ -51,9 +51,9 @@ function render_cth_carousel_block_template( $attributes, $content, $block ) {
     <div class="swiper-wrapper">',
     $attributes['blockID'],
     $attributes['slides_per_view'],
-    false,
-    false,
-    false,
+    $attributes['navigation'],
+    $attributes['scrollbar'],
+    $attributes['dots'],
     $attributes['loop'],
     $attributes['slide_gap']
   );
@@ -83,12 +83,16 @@ function render_cth_carousel_block_template( $attributes, $content, $block ) {
     $content = '<p>No Results</p>';
   }
   $content .= '</div>'; // close .swiper-wrapper
-
-  $content .= '<div class="swiper-pagination" data-id="' . $attributes['blockID'] . '"></div>';
-  $content .= '<button class="swiper-button-prev" data-id="' . $attributes['blockID'] . '"></button>';
-  $content .= '<button class="swiper-button-next" data-id="' . $attributes['blockID'] . '"></button>';
-  $content .= '<div class="swiper-scrollbar" data-id="' . $attributes['blockID'] . '"></div>';
-
+  if( $attributes['navigation'] ) {
+    $content .= '<button class="swiper-button-prev" data-id="' . $attributes['blockID'] . '"></button>';
+    $content .= '<button class="swiper-button-next" data-id="' . $attributes['blockID'] . '"></button>';
+  }
+  if( $attributes['dots'] ) {
+    $content .= '<div class="swiper-pagination" data-id="' . $attributes['blockID'] . '"></div>';
+  }
+  if( $attributes['scrollbar'] ) {
+    $content .= '<div class="swiper-scrollbar" data-id="' . $attributes['blockID'] . '"></div>';
+  }
   $content .= '</div>'; // close .swiper
 
   wp_reset_postdata();

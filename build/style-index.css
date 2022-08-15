@@ -476,14 +476,30 @@ button.swiper-pagination-bullet {
   display: none;
 }
 
+:root {
+  --cth-carousel--pagination-height: var(--wp--custom--typography--line-height--normal, 28px);
+}
+
 .wp-block-cth-blocks-cth-post-carousel {
   padding-top: 30px;
 }
-.wp-block-cth-blocks-cth-post-carousel .cth-post-carousel-list {
-  list-style: none;
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+.wp-block-cth-blocks-cth-post-carousel .swiper .swiper-wrapper {
+  padding-bottom: var(--cth-carousel--pagination-height);
+}
+.wp-block-cth-blocks-cth-post-carousel .swiper-pagination {
+  line-height: var(--cth-carousel--pagination-height);
+  height: var(--cth-carousel--pagination-height);
+}
+.wp-block-cth-blocks-cth-post-carousel .swiper-button-next,
+.wp-block-cth-blocks-cth-post-carousel .swiper-button-prev {
+  background: none;
+  border: none;
+}
+.wp-block-cth-blocks-cth-post-carousel .swiper-button-next {
+  right: 0;
+}
+.wp-block-cth-blocks-cth-post-carousel .swiper-button-prev {
+  left: 0;
 }
 
 /*# sourceMappingURL=style-index.css.map*/
