@@ -26,6 +26,7 @@ import {
 } from "@wordpress/element";
 import isEmpty from "lodash/isEmpty";
 import _uniqueId from "lodash/uniqueId";
+import { usePostTypes, useTaxonomies } from './utils';
 import './editor.scss';
 /**
  * Swiper
@@ -97,20 +98,21 @@ export default function Edit({ attributes, setAttributes, clientId }) {
   const [ activeBlockContextId, setActiveBlockContextId ] = useState();
   /**
   * Post Types
+  * Get Post Types and Taxonomies
   */
-   let postTypeOptions = [];
-   let registeredPostTypesFiltered = [];
-   const registeredPostTypes = useSelect( // get All post types
-     ( select ) => {
-       return select("core").getPostTypes();
-     }, [] // run on render, this won't change
-   );
-   if( registeredPostTypes ) {
-     registeredPostTypesFiltered = registeredPostTypes.filter(pt => pt.viewable && pt.visibility.show_in_nav_menus);
-     postTypeOptions = registeredPostTypesFiltered.map( (t) => {
-       return { label: t.name, value: t.slug };
-     } );
-   }
+  const postTypeSelectOptions = usePostTypes().postTypesSelectOptions;
+  /**
+   * Taxonomy Terms
+  */
+  const postTypeTaxonomiesMap = usePostTypes().postTypesTaxonomiesMap;
+  console.log(postTypeTaxonomiesMap);
+  console.log(useTaxonomies(query.postType));
+  /**
+   * TODO:
+   * add utility function to get terms from current post type taxonomies
+   * loop taxonomies and create comboboxcontrol for multiselect for each post type taxonomy
+   * set query taxquery based on selected terms in each category
+  */
   /**
    * Posts (Main Query for Rendering)
    * TODO: Support AND tax relation
@@ -160,58 +162,20 @@ export default function Edit({ attributes, setAttributes, clientId }) {
       }
 
       return {
-        posts: select("core").getEntityRecords("postType", query.postType.slug, query_args ),
+        posts: select("core").getEntityRecords("postType", query.postType, query_args ),
         blocks: select("core/block-editor").getBlocks( clientId )
       }
-    }, [query, terms]
-  );
-
-  /**
-   * Taxonomy Terms
-  */
-  const allCats = useSelect(
-    (select) => {
-      const returnArray = [];
-      const postTypeObject = query.postType.taxonomies ? query.postType : registeredPostTypesFiltered.filter( (type) => type.slug === query.postType.slug )[0];
-      if( postTypeObject ) {
-        const postTypeTaxonomies = postTypeObject.taxonomies;
-        if( postTypeTaxonomies ) {
-          for(const tax of postTypeTaxonomies) {
-            const taxTerms = select("core").getEntityRecords("taxonomy", tax, { per_page: -1 });
-            if( taxTerms ) {
-              for(const term of taxTerms) {
-                returnArray.push(term);
-              }
-            }
-          }
-        }
-      }
-      return returnArray;
     }, [query]
   );
-  const catSuggestions = {};
-  if( allCats ) {
-    for(const cat of allCats) {
-      catSuggestions[cat.name] = cat;
-    }
-  }
-  /**
-   * Utilities
-  */
-  const placeholders = [];
-  for ( let i = 0; i < query.perPage; i++ ) {
-    placeholders.push(i);
-  }
+  // console.log(query);
   /**
    * On Change Functions
   */
   /** Query Settings */
   const onChangePostType = (newPostType) => {
-    const updatedPostType = registeredPostTypesFiltered.filter( (type) => type.slug === newPostType )[0] ?? { slug: newPostType };
     const updatedQuery = {...query}
-    updatedQuery["postType"] = updatedPostType;
-    updatedQuery["terms"] = [];
-    setAttributes( { query: updatedQuery } );
+    updatedQuery["postType"] = newPostType;
+    setAttributes( { query: updatedQuery, terms: [] } );
   };
   const onChangeTerms = (newTerms) => {
     const hasNoSuggestions = newTerms.some((value) => typeof value === 'string' && !catSuggestions[value]);
@@ -267,22 +231,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
   useEffect( () => {
     setAttributes( { blockID: _uniqueId() } );
   }, [] );
-  useEffect( () => { // ensure actual term objects are set in attributes
-    if( !isEmpty(terms) ) {
-      terms.forEach(function(term, index) {
-        if( !term.slug ) {
-          const hasSuggestion = catSuggestions[term.value];
-          if( !hasSuggestion ) {
-            return;
-          }
-          let updatedTerms = [...terms];
-          updatedTerms[index] = catSuggestions[term.value];
-          setAttributes( { terms: updatedTerms } );
-        }
-      });
-    }
-  }, [catSuggestions] );
-
   const blockContexts = useMemo(
 		() =>
 			posts?.map( ( post ) => ( {
@@ -295,45 +243,27 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		<>
       <InspectorControls>
         <PanelBody title={ __( "Query Settings", "cth" ) }>
-          { registeredPostTypes
+          { postTypeSelectOptions
             ?
               <SelectControl
                 label={__( "Post Type", "cth" )}
-                value={query.postType.slug}
+                value={query.postType}
                 onChange={onChangePostType}
-                options={postTypeOptions}
+                options={postTypeSelectOptions}
                 __nextHasNoMarginBottom
               />
             :
               <Spinner/>
           }
-          {catSuggestions && !isEmpty(catSuggestions)
-            ?
-              <QueryControls
-                numberOfItems={query.perPage}
-                order={query.order}
-                orderBy={query.orderBy}
-                categorySuggestions={catSuggestions}
-                selectedCategories={terms}
-                onNumberOfItemsChange={onChangePostsPerPage}
-                onOrderChange={onChangeOrder}
-                onOrderByChange={onChangeOrderBy}
-                onCategoryChange={onChangeTerms}
-              />
-            :
-              isEmpty(catSuggestions) && isEmpty(allCats)
-              ?
-                <QueryControls
-                  numberOfItems={query.perPage}
-                  order={query.order}
-                  orderBy={query.orderBy}
-                  onNumberOfItemsChange={onChangePostsPerPage}
-                  onOrderChange={onChangeOrder}
-                  onOrderByChange={onChangeOrderBy}
-                />
-              :
-                <Spinner/>
-          }
+          <QueryControls
+            numberOfItems={query.perPage}
+            order={query.order}
+            orderBy={query.orderBy}
+            onNumberOfItemsChange={onChangePostsPerPage}
+            onOrderChange={onChangeOrder}
+            onOrderByChange={onChangeOrderBy}
+          />
+
         </PanelBody>
         <PanelBody title={__( "Carousel Settings", "cth" )}>
           <RangeControl
