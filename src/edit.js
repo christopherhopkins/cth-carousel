@@ -1,5 +1,3 @@
-// https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/query/edit/inspector-controls/order-control.js
-// https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/post-template/edit.js
 import { __ } from '@wordpress/i18n';
 import {
   useBlockProps,
@@ -16,6 +14,7 @@ import {
   QueryControls,
   RangeControl,
   SelectControl,
+  ComboboxControl,
   __experimentalGrid as Grid,
 } from "@wordpress/components";
 import {
@@ -104,15 +103,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
   /**
    * Taxonomy Terms
   */
-  const postTypeTaxonomiesMap = usePostTypes().postTypesTaxonomiesMap;
-  console.log(postTypeTaxonomiesMap);
-  console.log(useTaxonomies(query.postType));
-  /**
-   * TODO:
-   * add utility function to get terms from current post type taxonomies
-   * loop taxonomies and create comboboxcontrol for multiselect for each post type taxonomy
-   * set query taxquery based on selected terms in each category
-  */
+  const taxonomiesTermsMap = useTaxonomies(query.postType).taxonomiesTerms;
   /**
    * Posts (Main Query for Rendering)
    * TODO: Support AND tax relation
@@ -160,7 +151,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
           }
         }
       }
-
       return {
         posts: select("core").getEntityRecords("postType", query.postType, query_args ),
         blocks: select("core/block-editor").getBlocks( clientId )
@@ -185,6 +175,26 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     } );
     setAttributes( { terms: updatedCats } );
   }
+  const onChangeTaxQuery = (newTermID) => {
+    let foundTaxonomy = null;
+    Object.entries(taxonomiesTermsMap)?.map(
+      ([key, value]) => {
+        console.log("value", value);
+        console.log("newTermID", newTermID);
+        value.map( (term) => {
+          console.log(term.id);
+          if( term.id === newTermID ){
+            foundTaxonomy = term.taxonomy;
+          }
+        } );
+      }
+    );
+    console.log("foundTaxonomy", foundTaxonomy);
+    /**
+     * TODO: we have found taxonomy
+     * set query.taxQuery.foundTaxonomy to array and push the newTermID
+     */
+  };
   const onChangePostsPerPage = (number) => {
     const updatedQuery = {...query}
     updatedQuery["perPage"] = number;
@@ -263,6 +273,23 @@ export default function Edit({ attributes, setAttributes, clientId }) {
             onOrderChange={onChangeOrder}
             onOrderByChange={onChangeOrderBy}
           />
+
+          {taxonomiesTermsMap &&
+            Object.entries(taxonomiesTermsMap)?.map(
+              ([key, value]) => {
+                const termOptions = value.map((term) => { return { value: term.id, label: term.name } } )
+                // console.log(termOptions);
+                return(
+                  <ComboboxControl
+                    label={key}
+                    value={6}
+                    options={termOptions}
+                    onChange={onChangeTaxQuery}
+                  />
+                )
+              }
+            )
+          }
 
         </PanelBody>
         <PanelBody title={__( "Carousel Settings", "cth" )}>

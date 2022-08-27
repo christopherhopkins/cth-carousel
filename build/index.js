@@ -33,8 +33,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var swiper_react__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! swiper/react */ "./node_modules/swiper/react/swiper-react.js");
 
 
-// https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/query/edit/inspector-controls/order-control.js
-// https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/post-template/edit.js
 
 
 
@@ -96,6 +94,8 @@ function CarouselPostBlockPreview(_ref) {
 
 const MemorizedCarouselPostBlockPreview = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.memo)(CarouselPostBlockPreview);
 function Edit(_ref2) {
+  var _Object$entries2;
+
   let {
     attributes,
     setAttributes,
@@ -123,16 +123,7 @@ function Edit(_ref2) {
    * Taxonomy Terms
   */
 
-  const postTypeTaxonomiesMap = (0,_utils__WEBPACK_IMPORTED_MODULE_8__.usePostTypes)().postTypesTaxonomiesMap;
-  console.log(postTypeTaxonomiesMap);
-  console.log((0,_utils__WEBPACK_IMPORTED_MODULE_8__.useTaxonomies)(query.postType));
-  /**
-   * TODO:
-   * add utility function to get terms from current post type taxonomies
-   * loop taxonomies and create comboboxcontrol for multiselect for each post type taxonomy
-   * set query taxquery based on selected terms in each category
-  */
-
+  const taxonomiesTermsMap = (0,_utils__WEBPACK_IMPORTED_MODULE_8__.useTaxonomies)(query.postType).taxonomiesTerms;
   /**
    * Posts (Main Query for Rendering)
    * TODO: Support AND tax relation
@@ -222,6 +213,29 @@ function Edit(_ref2) {
     setAttributes({
       terms: updatedCats
     });
+  };
+
+  const onChangeTaxQuery = newTermID => {
+    var _Object$entries;
+
+    let foundTaxonomy = null;
+    (_Object$entries = Object.entries(taxonomiesTermsMap)) === null || _Object$entries === void 0 ? void 0 : _Object$entries.map(_ref3 => {
+      let [key, value] = _ref3;
+      console.log("value", value);
+      console.log("newTermID", newTermID);
+      value.map(term => {
+        console.log(term.id);
+
+        if (term.id === newTermID) {
+          foundTaxonomy = term.taxonomy;
+        }
+      });
+    });
+    console.log("foundTaxonomy", foundTaxonomy);
+    /**
+     * TODO: we have found taxonomy
+     * set query.taxQuery.foundTaxonomy to array and push the newTermID
+     */
   };
 
   const onChangePostsPerPage = number => {
@@ -327,7 +341,22 @@ function Edit(_ref2) {
     onNumberOfItemsChange: onChangePostsPerPage,
     onOrderChange: onChangeOrder,
     onOrderByChange: onChangeOrderBy
-  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.PanelBody, {
+  }), taxonomiesTermsMap && ((_Object$entries2 = Object.entries(taxonomiesTermsMap)) === null || _Object$entries2 === void 0 ? void 0 : _Object$entries2.map(_ref4 => {
+    let [key, value] = _ref4;
+    const termOptions = value.map(term => {
+      return {
+        value: term.id,
+        label: term.name
+      };
+    }); // console.log(termOptions);
+
+    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.ComboboxControl, {
+      label: key,
+      value: 6,
+      options: termOptions,
+      onChange: onChangeTaxQuery
+    });
+  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.PanelBody, {
     title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Carousel Settings", "cth")
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.RangeControl, {
     label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Slides Per View", "cth"),
@@ -581,7 +610,29 @@ const useTaxonomies = postType => {
     });
     return filteredTaxonomies;
   }, [postType]);
-  return taxonomies;
+  const taxonomiesTerms = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_0__.useSelect)(select => {
+    if (!(taxonomies !== null && taxonomies !== void 0 && taxonomies.length)) return;
+    const {
+      getEntityRecords
+    } = select(_wordpress_core_data__WEBPACK_IMPORTED_MODULE_2__.store);
+    const postTypeTaxonomiesTerms = {};
+    taxonomies.forEach(function (tax, index) {
+      var _getEntityRecords;
+
+      postTypeTaxonomiesTerms[tax.name] = [];
+      const thisTaxonomyTerms = (_getEntityRecords = getEntityRecords("taxonomy", tax.slug, {
+        per_page: -1,
+        hide_empty: true
+      })) === null || _getEntityRecords === void 0 ? void 0 : _getEntityRecords.map(term => {
+        postTypeTaxonomiesTerms[tax.name].push(term);
+      });
+    });
+    return postTypeTaxonomiesTerms;
+  }, [taxonomies]);
+  return {
+    taxonomies,
+    taxonomiesTerms
+  };
 };
 
 /***/ }),

@@ -33,17 +33,35 @@ export const usePostTypes = () => {
 };
 
 export const useTaxonomies = ( postType ) => {
-	const taxonomies = useSelect(
-		( select ) => {
-			const { getTaxonomies } = select( coreStore );
-			const filteredTaxonomies = getTaxonomies( {
-				type: postType,
-				per_page: -1,
-				context: 'view',
-			} );
-			return filteredTaxonomies;
-		},
-		[ postType ]
-	);
-	return taxonomies;
+  const taxonomies = useSelect(
+    ( select ) => {
+      const { getTaxonomies } = select( coreStore );
+      const filteredTaxonomies = getTaxonomies( {
+        type: postType,
+        per_page: -1,
+        context: 'view',
+      } );
+      return filteredTaxonomies;
+    },
+    [ postType ]
+  );
+  const taxonomiesTerms = useSelect(
+    (select) => {
+      if ( ! taxonomies?.length ) return;
+      const { getEntityRecords } = select( coreStore );
+      const postTypeTaxonomiesTerms = {};
+      taxonomies.forEach(function(tax, index) {
+        postTypeTaxonomiesTerms[tax.name] = [];
+        const thisTaxonomyTerms = getEntityRecords( "taxonomy", tax.slug, {
+          per_page: -1,
+          hide_empty: true
+        } )?.map((term) => {
+          postTypeTaxonomiesTerms[tax.name].push(term)
+        });
+      });
+      return postTypeTaxonomiesTerms;
+    },
+    [taxonomies]
+  );
+  return { taxonomies, taxonomiesTerms };
 };
