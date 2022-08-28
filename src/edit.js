@@ -14,7 +14,7 @@ import {
   QueryControls,
   RangeControl,
   SelectControl,
-  ComboboxControl,
+  FormTokenField,
   __experimentalGrid as Grid,
 } from "@wordpress/components";
 import {
@@ -25,7 +25,7 @@ import {
 } from "@wordpress/element";
 import isEmpty from "lodash/isEmpty";
 import _uniqueId from "lodash/uniqueId";
-import { usePostTypes, useTaxonomies } from './utils';
+import { usePostTypes, useTaxonomies, getTermIdByName, getExistingTaxQueryValue } from './utils';
 import './editor.scss';
 /**
  * Swiper
@@ -86,6 +86,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
   const {
     blockID,
     terms,
+    taxRelationBool,
     query,
     slides_per_view,
     loop,
@@ -103,7 +104,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
   /**
    * Taxonomy Terms
   */
-  const taxonomiesTermsMap = useTaxonomies(query.postType).taxonomiesTerms;
+  const usingTaxonomies = useTaxonomies(query.postType);
+  const taxonomiesTermsMap = usingTaxonomies.taxonomiesTerms;
   /**
    * Posts (Main Query for Rendering)
    * TODO: Support AND tax relation
@@ -119,45 +121,34 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         order: query.order,
         orderby: query.orderBy,
         status: query.status,
-        tax_relation: query.taxRelation,
         _embed: query._embed,
       };
-      if( !isEmpty(terms) ) {
-        for(const term of terms) {
-          switch( term.taxonomy ) {
-            case "category":
-              if( !("categories" in query_args) ) {
-                query_args["categories"] = [];
-                query_args["categories"].push(term.id);
-              } else {
-                query_args["categories"].push(term.id);
-              }
-              break;
-            case "post_tag":
-              if( !("tags" in query_args) ) {
-                query_args["tags"] = [];
-                query_args["tags"].push(term.id);
-              } else {
-                query_args["tags"].push(term.id);
-              }
-              break;
-            default:
-              if( !(term.taxonomy in query_args) ) {
-                query_args[term.taxonomy] = [];
-                query_args[term.taxonomy].push(term.id);
-              } else {
-                query_args[term.taxonomy].push(term.id);
-              }
-          }
-        }
+      query_args["tax_relation"] = query.taxRelation ? "AND" : "OR";
+      if( query.taxQuery ) {
+        const taxonomies = usingTaxonomies.taxonomies;
+        const builtTaxQuery = Object.entries( query.taxQuery ).reduce(
+					( accumulator, [ taxonomySlug, terms ] ) => {
+						const taxonomy = taxonomies?.find(
+							( { slug } ) => slug === taxonomySlug
+						);
+						if ( taxonomy?.rest_base ) {
+							accumulator[ taxonomy?.rest_base ] = terms;
+						}
+						return accumulator;
+					},
+					{}
+				);
+        if ( !! Object.keys( builtTaxQuery ).length ) {
+					Object.assign( query_args, builtTaxQuery );
+				}
       }
+      console.log("query_args", query_args);
       return {
         posts: select("core").getEntityRecords("postType", query.postType, query_args ),
         blocks: select("core/block-editor").getBlocks( clientId )
       }
-    }, [query]
+    }, [query, usingTaxonomies]
   );
-  // console.log(query);
   /**
    * On Change Functions
   */
@@ -167,33 +158,20 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     updatedQuery["postType"] = newPostType;
     setAttributes( { query: updatedQuery, terms: [] } );
   };
-  const onChangeTerms = (newTerms) => {
-    const hasNoSuggestions = newTerms.some((value) => typeof value === 'string' && !catSuggestions[value]);
-    if( hasNoSuggestions ) return;
-    const updatedCats = newTerms.map( (token) => {
-      return typeof token === "string" ? catSuggestions[token] : token;
-    } );
-    setAttributes( { terms: updatedCats } );
-  }
-  const onChangeTaxQuery = (newTermID) => {
-    let foundTaxonomy = null;
-    Object.entries(taxonomiesTermsMap)?.map(
-      ([key, value]) => {
-        console.log("value", value);
-        console.log("newTermID", newTermID);
-        value.map( (term) => {
-          console.log(term.id);
-          if( term.id === newTermID ){
-            foundTaxonomy = term.taxonomy;
-          }
-        } );
-      }
-    );
-    console.log("foundTaxonomy", foundTaxonomy);
-    /**
-     * TODO: we have found taxonomy
-     * set query.taxQuery.foundTaxonomy to array and push the newTermID
-     */
+  const onChangeTaxQuery = ( taxonomySlug ) => (newTermSlugs) => {
+    const termIds = newTermSlugs?.map((newTermSlug) => {
+      const gottenTermByName = getTermIdByName(newTermSlug, taxonomiesTermsMap);
+      return gottenTermByName.foundTermID;
+    });
+    const updatedQuery = {...query};
+    if( taxonomySlug ) {
+      const newTaxQuery = {
+        ...query.taxQuery,
+        [ taxonomySlug ]: termIds
+      };
+      updatedQuery["taxQuery"] = newTaxQuery;
+      setAttributes( { query: updatedQuery } );
+    }
   };
   const onChangePostsPerPage = (number) => {
     const updatedQuery = {...query}
@@ -212,6 +190,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     const updatedQuery = {...query}
     updatedQuery["orderBy"] = newOrderBy;
     setAttributes( { query: updatedQuery } );
+  }
+  const onChangeTaxRelation = () => {
+    const updatedQuery = {...query};
+    updatedQuery["taxRelation"] = !updatedQuery["taxRelation"];
+    setAttributes({
+      query: updatedQuery
+    });
   }
   /** Carousel Settings */
   const onChangeSlidesPerView = (number) => {
@@ -277,20 +262,31 @@ export default function Edit({ attributes, setAttributes, clientId }) {
           {taxonomiesTermsMap &&
             Object.entries(taxonomiesTermsMap)?.map(
               ([key, value]) => {
-                const termOptions = value.map((term) => { return { value: term.id, label: term.name } } )
-                // console.log(termOptions);
+                const termOptions = value?.map((term) => { return term.name } )
                 return(
-                  <ComboboxControl
-                    label={key}
-                    value={6}
-                    options={termOptions}
-                    onChange={onChangeTaxQuery}
+                  <FormTokenField
+                    key={key}
+                    label={key.replaceAll("-", " ").replaceAll("_", " ").toUpperCase()} // TODO, get nicer looking name. Maybe getTaxonomyNameFromSlug util function
+                    value={getExistingTaxQueryValue(key, query, taxonomiesTermsMap)}
+                    suggestions={termOptions}
+                    onChange={onChangeTaxQuery( key )}
                   />
-                )
+                );
               }
             )
           }
-
+          {query.taxQuery &&
+            <ToggleControl
+            label={__( "Taxonomy Relation", "cth" )}
+            help={
+              query.taxRelation
+              ? __( "AND relation between taxonomies", "cth")
+              : __( "OR relation between taxonomies", "cth" )
+            }
+            checked={query.taxRelation}
+            onChange={onChangeTaxRelation}
+          />
+          }
         </PanelBody>
         <PanelBody title={__( "Carousel Settings", "cth" )}>
           <RangeControl

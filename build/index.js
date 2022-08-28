@@ -94,7 +94,7 @@ function CarouselPostBlockPreview(_ref) {
 
 const MemorizedCarouselPostBlockPreview = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.memo)(CarouselPostBlockPreview);
 function Edit(_ref2) {
-  var _Object$entries2;
+  var _Object$entries;
 
   let {
     attributes,
@@ -104,6 +104,7 @@ function Edit(_ref2) {
   const {
     blockID,
     terms,
+    taxRelationBool,
     query,
     slides_per_view,
     loop,
@@ -123,7 +124,8 @@ function Edit(_ref2) {
    * Taxonomy Terms
   */
 
-  const taxonomiesTermsMap = (0,_utils__WEBPACK_IMPORTED_MODULE_8__.useTaxonomies)(query.postType).taxonomiesTerms;
+  const usingTaxonomies = (0,_utils__WEBPACK_IMPORTED_MODULE_8__.useTaxonomies)(query.postType);
+  const taxonomiesTermsMap = usingTaxonomies.taxonomiesTerms;
   /**
    * Posts (Main Query for Rendering)
    * TODO: Support AND tax relation
@@ -143,51 +145,39 @@ function Edit(_ref2) {
       order: query.order,
       orderby: query.orderBy,
       status: query.status,
-      tax_relation: query.taxRelation,
       _embed: query._embed
     };
+    query_args["tax_relation"] = query.taxRelation ? "AND" : "OR";
 
-    if (!lodash_isEmpty__WEBPACK_IMPORTED_MODULE_6___default()(terms)) {
-      for (const term of terms) {
-        switch (term.taxonomy) {
-          case "category":
-            if (!("categories" in query_args)) {
-              query_args["categories"] = [];
-              query_args["categories"].push(term.id);
-            } else {
-              query_args["categories"].push(term.id);
-            }
+    if (query.taxQuery) {
+      const taxonomies = usingTaxonomies.taxonomies;
+      const builtTaxQuery = Object.entries(query.taxQuery).reduce((accumulator, _ref3) => {
+        let [taxonomySlug, terms] = _ref3;
+        const taxonomy = taxonomies === null || taxonomies === void 0 ? void 0 : taxonomies.find(_ref4 => {
+          let {
+            slug
+          } = _ref4;
+          return slug === taxonomySlug;
+        });
 
-            break;
-
-          case "post_tag":
-            if (!("tags" in query_args)) {
-              query_args["tags"] = [];
-              query_args["tags"].push(term.id);
-            } else {
-              query_args["tags"].push(term.id);
-            }
-
-            break;
-
-          default:
-            if (!(term.taxonomy in query_args)) {
-              query_args[term.taxonomy] = [];
-              query_args[term.taxonomy].push(term.id);
-            } else {
-              query_args[term.taxonomy].push(term.id);
-            }
-
+        if (taxonomy !== null && taxonomy !== void 0 && taxonomy.rest_base) {
+          accumulator[taxonomy === null || taxonomy === void 0 ? void 0 : taxonomy.rest_base] = terms;
         }
+
+        return accumulator;
+      }, {});
+
+      if (!!Object.keys(builtTaxQuery).length) {
+        Object.assign(query_args, builtTaxQuery);
       }
     }
 
+    console.log("query_args", query_args);
     return {
       posts: select("core").getEntityRecords("postType", query.postType, query_args),
       blocks: select("core/block-editor").getBlocks(clientId)
     };
-  }, [query]); // console.log(query);
-
+  }, [query, usingTaxonomies]);
   /**
    * On Change Functions
   */
@@ -204,38 +194,23 @@ function Edit(_ref2) {
     });
   };
 
-  const onChangeTerms = newTerms => {
-    const hasNoSuggestions = newTerms.some(value => typeof value === 'string' && !catSuggestions[value]);
-    if (hasNoSuggestions) return;
-    const updatedCats = newTerms.map(token => {
-      return typeof token === "string" ? catSuggestions[token] : token;
+  const onChangeTaxQuery = taxonomySlug => newTermSlugs => {
+    const termIds = newTermSlugs === null || newTermSlugs === void 0 ? void 0 : newTermSlugs.map(newTermSlug => {
+      const gottenTermByName = (0,_utils__WEBPACK_IMPORTED_MODULE_8__.getTermIdByName)(newTermSlug, taxonomiesTermsMap);
+      return gottenTermByName.foundTermID;
     });
-    setAttributes({
-      terms: updatedCats
-    });
-  };
+    const updatedQuery = { ...query
+    };
 
-  const onChangeTaxQuery = newTermID => {
-    var _Object$entries;
-
-    let foundTaxonomy = null;
-    (_Object$entries = Object.entries(taxonomiesTermsMap)) === null || _Object$entries === void 0 ? void 0 : _Object$entries.map(_ref3 => {
-      let [key, value] = _ref3;
-      console.log("value", value);
-      console.log("newTermID", newTermID);
-      value.map(term => {
-        console.log(term.id);
-
-        if (term.id === newTermID) {
-          foundTaxonomy = term.taxonomy;
-        }
+    if (taxonomySlug) {
+      const newTaxQuery = { ...query.taxQuery,
+        [taxonomySlug]: termIds
+      };
+      updatedQuery["taxQuery"] = newTaxQuery;
+      setAttributes({
+        query: updatedQuery
       });
-    });
-    console.log("foundTaxonomy", foundTaxonomy);
-    /**
-     * TODO: we have found taxonomy
-     * set query.taxQuery.foundTaxonomy to array and push the newTermID
-     */
+    }
   };
 
   const onChangePostsPerPage = number => {
@@ -264,6 +239,15 @@ function Edit(_ref2) {
     const updatedQuery = { ...query
     };
     updatedQuery["orderBy"] = newOrderBy;
+    setAttributes({
+      query: updatedQuery
+    });
+  };
+
+  const onChangeTaxRelation = () => {
+    const updatedQuery = { ...query
+    };
+    updatedQuery["taxRelation"] = !updatedQuery["taxRelation"];
     setAttributes({
       query: updatedQuery
     });
@@ -341,22 +325,25 @@ function Edit(_ref2) {
     onNumberOfItemsChange: onChangePostsPerPage,
     onOrderChange: onChangeOrder,
     onOrderByChange: onChangeOrderBy
-  }), taxonomiesTermsMap && ((_Object$entries2 = Object.entries(taxonomiesTermsMap)) === null || _Object$entries2 === void 0 ? void 0 : _Object$entries2.map(_ref4 => {
-    let [key, value] = _ref4;
-    const termOptions = value.map(term => {
-      return {
-        value: term.id,
-        label: term.name
-      };
-    }); // console.log(termOptions);
-
-    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.ComboboxControl, {
-      label: key,
-      value: 6,
-      options: termOptions,
-      onChange: onChangeTaxQuery
+  }), taxonomiesTermsMap && ((_Object$entries = Object.entries(taxonomiesTermsMap)) === null || _Object$entries === void 0 ? void 0 : _Object$entries.map(_ref5 => {
+    let [key, value] = _ref5;
+    const termOptions = value === null || value === void 0 ? void 0 : value.map(term => {
+      return term.name;
     });
-  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.PanelBody, {
+    return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.FormTokenField, {
+      key: key,
+      label: key.replaceAll("-", " ").replaceAll("_", " ").toUpperCase() // TODO, get nicer looking name. Maybe getTaxonomyNameFromSlug util function
+      ,
+      value: (0,_utils__WEBPACK_IMPORTED_MODULE_8__.getExistingTaxQueryValue)(key, query, taxonomiesTermsMap),
+      suggestions: termOptions,
+      onChange: onChangeTaxQuery(key)
+    });
+  })), query.taxQuery && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.ToggleControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Taxonomy Relation", "cth"),
+    help: query.taxRelation ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("AND relation between taxonomies", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("OR relation between taxonomies", "cth"),
+    checked: query.taxRelation,
+    onChange: onChangeTaxRelation
+  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.PanelBody, {
     title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Carousel Settings", "cth")
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.RangeControl, {
     label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Slides Per View", "cth"),
@@ -545,6 +532,8 @@ function save() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getExistingTaxQueryValue": () => (/* binding */ getExistingTaxQueryValue),
+/* harmony export */   "getTermIdByName": () => (/* binding */ getTermIdByName),
 /* harmony export */   "usePostTypes": () => (/* binding */ usePostTypes),
 /* harmony export */   "useTaxonomies": () => (/* binding */ useTaxonomies)
 /* harmony export */ });
@@ -619,12 +608,12 @@ const useTaxonomies = postType => {
     taxonomies.forEach(function (tax, index) {
       var _getEntityRecords;
 
-      postTypeTaxonomiesTerms[tax.name] = [];
+      postTypeTaxonomiesTerms[tax.slug] = [];
       const thisTaxonomyTerms = (_getEntityRecords = getEntityRecords("taxonomy", tax.slug, {
         per_page: -1,
         hide_empty: true
       })) === null || _getEntityRecords === void 0 ? void 0 : _getEntityRecords.map(term => {
-        postTypeTaxonomiesTerms[tax.name].push(term);
+        postTypeTaxonomiesTerms[tax.slug].push(term);
       });
     });
     return postTypeTaxonomiesTerms;
@@ -633,6 +622,40 @@ const useTaxonomies = postType => {
     taxonomies,
     taxonomiesTerms
   };
+};
+const getTermIdByName = (termValue, taxonomiesTermsMap) => {
+  var _Object$entries;
+
+  let [foundTaxonomy, foundTermID] = [null, null];
+  const returnObject = (_Object$entries = Object.entries(taxonomiesTermsMap)) === null || _Object$entries === void 0 ? void 0 : _Object$entries.map(_ref3 => {
+    let [key, taxonomyTerms] = _ref3;
+    taxonomyTerms === null || taxonomyTerms === void 0 ? void 0 : taxonomyTerms.map(term => {
+      if (term.name === termValue) {
+        foundTaxonomy = term.taxonomy;
+        foundTermID = term.id;
+        return;
+      }
+    });
+    return;
+  });
+  return {
+    foundTaxonomy,
+    foundTermID
+  };
+};
+const getExistingTaxQueryValue = (taxQuerySlug, query, taxonomiesTermsMap) => {
+  var _taxonomiesTermsMap$t;
+
+  if (!taxonomiesTermsMap) return [];
+  if (!query.taxQuery) return [];
+  if (!query.taxQuery[taxQuerySlug]) return [];
+  const taxQueryNames = [];
+  (_taxonomiesTermsMap$t = taxonomiesTermsMap[taxQuerySlug]) === null || _taxonomiesTermsMap$t === void 0 ? void 0 : _taxonomiesTermsMap$t.map(mappedTaxTerm => {
+    if (query.taxQuery[taxQuerySlug].includes(mappedTaxTerm.id)) {
+      taxQueryNames.push(mappedTaxTerm.name);
+    }
+  });
+  return taxQueryNames;
 };
 
 /***/ }),
@@ -16464,7 +16487,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"terms":{"type":"array","items":{"type":"object"}},"query":{"type":"object","default":{"perPage":1,"pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":false,"taxRelation":"OR","_embed":true,"taxQuery":null,"status":"publish"}},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false},"slide_gap":{"type":"number","default":0}}}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"terms":{"type":"array","items":{"type":"object"}},"query":{"type":"object","default":{"perPage":1,"pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":false,"taxRelation":false,"_embed":true,"taxQuery":null,"status":"publish"}},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false},"slide_gap":{"type":"number","default":0}}}');
 
 /***/ })
 

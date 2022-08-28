@@ -51,12 +51,12 @@ export const useTaxonomies = ( postType ) => {
       const { getEntityRecords } = select( coreStore );
       const postTypeTaxonomiesTerms = {};
       taxonomies.forEach(function(tax, index) {
-        postTypeTaxonomiesTerms[tax.name] = [];
+        postTypeTaxonomiesTerms[tax.slug] = [];
         const thisTaxonomyTerms = getEntityRecords( "taxonomy", tax.slug, {
           per_page: -1,
           hide_empty: true
         } )?.map((term) => {
-          postTypeTaxonomiesTerms[tax.name].push(term)
+          postTypeTaxonomiesTerms[tax.slug].push(term)
         });
       });
       return postTypeTaxonomiesTerms;
@@ -64,4 +64,34 @@ export const useTaxonomies = ( postType ) => {
     [taxonomies]
   );
   return { taxonomies, taxonomiesTerms };
+};
+
+export const getTermIdByName = (termValue, taxonomiesTermsMap) => {
+  let [ foundTaxonomy, foundTermID ] = [ null, null ];
+  const returnObject = Object.entries(taxonomiesTermsMap)?.map(
+    ([key, taxonomyTerms]) => {
+      taxonomyTerms?.map( (term) => {
+        if( term.name === termValue ) {
+          foundTaxonomy = term.taxonomy;
+          foundTermID = term.id;
+          return;
+        }
+      } );
+      return;
+    }
+  );
+  return { foundTaxonomy, foundTermID }
+}
+
+export const getExistingTaxQueryValue = (taxQuerySlug, query, taxonomiesTermsMap) => {
+  if( !taxonomiesTermsMap ) return [];
+  if( !query.taxQuery ) return [];
+  if( !query.taxQuery[taxQuerySlug] ) return [];
+  const taxQueryNames = [];
+  taxonomiesTermsMap[taxQuerySlug]?.map((mappedTaxTerm) => {
+    if( query.taxQuery[taxQuerySlug].includes(mappedTaxTerm.id) ) {
+      taxQueryNames.push(mappedTaxTerm.name);
+    }
+  });
+  return taxQueryNames;
 };

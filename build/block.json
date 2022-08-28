@@ -43,7 +43,7 @@
         "search": "",
         "exclude": [],
         "sticky": false,
-        "taxRelation": "OR",
+        "taxRelation": false,
         "_embed": true,
         "taxQuery": null,
         "status": "publish"

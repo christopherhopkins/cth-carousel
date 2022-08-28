@@ -8,31 +8,28 @@ function render_cth_carousel_block_template( $attributes, $content, $block ) {
   $posts_per_page = $attributes["query"]["perPage"];
   $orderby = $attributes["query"]["orderBy"] ?? "date";
   $order = $attributes["query"]["order"] ?? "desc";
-  $tax_relation = $attributes["query"]["taxRelation"] ?? "OR";
+  $tax_relation = $attributes["query"]["taxRelation"] ? "AND" : "OR";
+  $tax_queries = $attributes["query"]["taxQuery"];
   $args = array(
       "post_type" => $post_type,
       "posts_per_page" => $posts_per_page,
       "orderby" => $orderby,
       "order" => $order,
   );
-  if( !empty($attributes["terms"]) ) {
-      $args["tax_query"] = array(
-          "relation" => $tax_relation
+  if( !empty( $tax_queries ) ) {
+    // var_dump("$tax_queries", $tax_queries);
+    $args["tax_query"] = [ "relation" => $tax_relation ];
+    foreach($tax_queries as $key => $tax_query) {
+      $taxonomy_slug = $key;
+      $taxonomy_terms_ids = $tax_query;
+      $args["tax_query"][] = array(
+        "taxonomy" => $taxonomy_slug,
+        "field" => "term_id",
+        "terms" => $taxonomy_terms_ids,
+        "include_children" => false,
+        "operator" => "IN"
       );
-      // Build Tax Query
-      // TODO: support AND taxonomy relation
-      foreach( $attributes["terms"] as $term ) {
-          $taxonomy = $term["taxonomy"];
-          $id = $term["id"];
-          $tax_query_array = array(
-              "taxonomy" => $taxonomy,
-              "field" => "term_id",
-              "terms" => [$id],
-              "include_children" => false,
-              "operator" => "IN"
-          );
-          array_push($args["tax_query"], $tax_query_array);
-      }
+    }
   }
 
   $carousel_posts = new WP_Query( $args );
