@@ -172,7 +172,6 @@ function Edit(_ref2) {
       }
     }
 
-    console.log("query_args", query_args);
     return {
       posts: select("core").getEntityRecords("postType", query.postType, query_args),
       blocks: select("core/block-editor").getBlocks(clientId)
@@ -381,7 +380,11 @@ function Edit(_ref2) {
     help: scrollbar ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Scrollbar", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("No Scrollbar", "cth"),
     checked: scrollbar,
     onChange: onChangeScrollbar
-  })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.useBlockProps)(), blockContexts && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_11__.Swiper, {
+  })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.useBlockProps)(), !posts && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+    className: "posts-loading"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Spinner, null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("p", null, "Loading...")), posts && lodash_isEmpty__WEBPACK_IMPORTED_MODULE_6___default()(posts) && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+    class: "no-results"
+  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("h2", null, "No Results")), posts && !lodash_isEmpty__WEBPACK_IMPORTED_MODULE_6___default()(posts) && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_11__.Swiper, {
     modules: [swiper__WEBPACK_IMPORTED_MODULE_10__.A11y, swiper__WEBPACK_IMPORTED_MODULE_10__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_10__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_10__.Scrollbar, swiper__WEBPACK_IMPORTED_MODULE_10__.Keyboard],
     slidesPerView: slides_per_view,
     navigation: navigation ? {
@@ -411,9 +414,7 @@ function Edit(_ref2) {
       setActiveBlockContextId: setActiveBlockContextId,
       isHidden: blockContext.postId === (activeBlockContextId || ((_blockContexts$2 = blockContexts[0]) === null || _blockContexts$2 === void 0 ? void 0 : _blockContexts$2.postId))
     })));
-  })))), !blockContexts && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
-    className: "posts-loading"
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Spinner, null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("p", null, "Loading..."))));
+  }))))));
 }
 
 /***/ }),

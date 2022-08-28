@@ -142,7 +142,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 					Object.assign( query_args, builtTaxQuery );
 				}
       }
-      console.log("query_args", query_args);
       return {
         posts: select("core").getEntityRecords("postType", query.postType, query_args ),
         blocks: select("core/block-editor").getBlocks( clientId )
@@ -350,7 +349,19 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         </PanelBody>
       </InspectorControls>
 			<div { ...useBlockProps()}>
-        {blockContexts &&
+        {!posts &&
+          <div className="posts-loading">
+            <Spinner />
+            <p>Loading...</p>
+          </div>
+        }
+        {posts && isEmpty(posts) &&
+          <div class="no-results">
+            <h2>No Results</h2>
+          </div>
+        }
+
+        {posts && !isEmpty(posts) &&
           <>
             <Swiper
               modules={[A11y, Navigation, Pagination, Scrollbar, Keyboard]}
@@ -392,12 +403,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
               </div>
             </Swiper>
           </>
-        }
-        {!blockContexts &&
-          <div className="posts-loading">
-            <Spinner />
-            <p>Loading...</p>
-          </div>
         }
 			</div>
 		</>
