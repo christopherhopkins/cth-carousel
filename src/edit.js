@@ -85,8 +85,6 @@ const MemorizedCarouselPostBlockPreview = memo( CarouselPostBlockPreview );
 export default function Edit({ attributes, setAttributes, clientId }) {
   const {
     blockID,
-    terms,
-    taxRelationBool,
     query,
     slides_per_view,
     loop,
@@ -108,7 +106,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
   const taxonomiesTermsMap = usingTaxonomies.taxonomiesTerms;
   /**
    * Posts (Main Query for Rendering)
-   * TODO: Support AND tax relation
   */
   const { posts, blocks } = useSelect( // main query
     ( select ) => {

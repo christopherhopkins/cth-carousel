@@ -21,12 +21,6 @@
 			"type": "string",
 			"default": "0"
 		},
-		"terms": {
-			"type": "array",
-			"items": {
-				"type": "object"
-			}
-		},
 		"query": {
 			"type": "object",
 			"default": {
