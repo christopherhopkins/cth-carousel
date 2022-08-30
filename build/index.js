@@ -103,8 +103,6 @@ function Edit(_ref2) {
   } = _ref2;
   const {
     blockID,
-    terms,
-    taxRelationBool,
     query,
     slides_per_view,
     loop,
@@ -128,7 +126,6 @@ function Edit(_ref2) {
   const taxonomiesTermsMap = usingTaxonomies.taxonomiesTerms;
   /**
    * Posts (Main Query for Rendering)
-   * TODO: Support AND tax relation
   */
 
   const {
@@ -16488,7 +16485,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"terms":{"type":"array","items":{"type":"object"}},"query":{"type":"object","default":{"perPage":1,"pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":false,"taxRelation":false,"_embed":true,"taxQuery":null,"status":"publish"}},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false},"slide_gap":{"type":"number","default":0}}}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"query":{"type":"object","default":{"perPage":1,"pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":false,"taxRelation":false,"_embed":true,"taxQuery":null,"status":"publish"}},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false},"slide_gap":{"type":"number","default":0}}}');
 
 /***/ })
 
