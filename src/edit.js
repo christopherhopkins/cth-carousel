@@ -30,7 +30,7 @@ import './editor.scss';
 /**
  * Swiper
 */
-import { Navigation, Pagination, Scrollbar, A11y, Keyboard } from 'swiper';
+import { Navigation, Pagination, Scrollbar, A11y, Keyboard, EffectFade } from 'swiper';
 import { Swiper, SwiperSlide } from "swiper/react";
 
 const TEMPLATE = [
@@ -91,7 +91,8 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     navigation,
     dots,
     scrollbar,
-    slide_gap
+    slide_gap,
+    effect
   } = attributes;
   const [ activeBlockContextId, setActiveBlockContextId ] = useState();
   /**
@@ -145,6 +146,12 @@ export default function Edit({ attributes, setAttributes, clientId }) {
       }
     }, [query, usingTaxonomies]
   );
+
+  let swiperModules = [Navigation, Pagination, Scrollbar, A11y, Keyboard];
+  const possibleEffects = {
+    "fade": EffectFade,
+    "slide": null
+  };
   /**
    * On Change Functions
   */
@@ -215,6 +222,21 @@ export default function Edit({ attributes, setAttributes, clientId }) {
   }
   const onChangeSlideGap = (newGap) => {
     setAttributes( { slide_gap: newGap } );
+  }
+  const onChangeEffect = (newEffect) => {
+    let newModule = null;
+    const newModuleModule = Object.entries(possibleEffects)?.map(
+      ([key, module]) => {
+        if( key === newEffect ) {
+          console.log(module);
+          return module;
+        }
+      }
+    )
+    // if( newModule ) {
+    //   setAttributes({ effect: newEffect });
+    //   setAttributes()
+    // }
   }
   /**
    * UseEffects
@@ -343,6 +365,23 @@ export default function Edit({ attributes, setAttributes, clientId }) {
               onChange={onChangeScrollbar}
             />
           </Grid>
+          <SelectControl
+            label={__( "Change Effect", "cth" )}
+            value={effect}
+            onChange={onChangeEffect}
+            options={[
+              {
+                label: "Slide",
+                value: "slide"
+              },
+              {
+                label: "Fade",
+                value: "fade",
+                module: EffectFade,
+              }
+            ]}
+            __nextHasNoMarginBottom
+          />
         </PanelBody>
       </InspectorControls>
 			<div { ...useBlockProps()}>
@@ -361,7 +400,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         {posts && !isEmpty(posts) &&
           <>
             <Swiper
-              modules={[A11y, Navigation, Pagination, Scrollbar, Keyboard]}
+              modules={[A11y, Navigation, Pagination, Scrollbar, Keyboard, EffectFade]}
               slidesPerView={slides_per_view}
               navigation={navigation ? { clickable: true } : navigation}
               pagination={dots ? { clickable: true } : dots}
@@ -370,6 +409,13 @@ export default function Edit({ attributes, setAttributes, clientId }) {
               spaceBetween={slide_gap}
               autoHeight={true}
               keyboard={true}
+              effect="fade"
+              fadeEffect={{crossFade: true}}
+              /**
+               * Don't allow swiping/dragging in editor
+               * so editing post template is easier
+              */
+              allowTouchMove={false}
             >
               <div class="swiper-wrapper">
                 {blockContexts &&

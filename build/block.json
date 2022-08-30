@@ -66,6 +66,10 @@
     "slide_gap": {
       "type": "number",
       "default": 0
+    },
+    "effect": {
+      "type": "string",
+      "default": "slide"
     }
   }
 }

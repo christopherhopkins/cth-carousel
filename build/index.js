@@ -94,7 +94,7 @@ function CarouselPostBlockPreview(_ref) {
 
 const MemorizedCarouselPostBlockPreview = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.memo)(CarouselPostBlockPreview);
 function Edit(_ref2) {
-  var _Object$entries;
+  var _Object$entries2;
 
   let {
     attributes,
@@ -109,7 +109,8 @@ function Edit(_ref2) {
     navigation,
     dots,
     scrollbar,
-    slide_gap
+    slide_gap,
+    effect
   } = attributes;
   const [activeBlockContextId, setActiveBlockContextId] = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useState)();
   /**
@@ -174,6 +175,11 @@ function Edit(_ref2) {
       blocks: select("core/block-editor").getBlocks(clientId)
     };
   }, [query, usingTaxonomies]);
+  let swiperModules = [swiper__WEBPACK_IMPORTED_MODULE_10__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_10__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_10__.Scrollbar, swiper__WEBPACK_IMPORTED_MODULE_10__.A11y, swiper__WEBPACK_IMPORTED_MODULE_10__.Keyboard];
+  const possibleEffects = {
+    "fade": swiper__WEBPACK_IMPORTED_MODULE_10__.EffectFade,
+    "slide": null
+  };
   /**
    * On Change Functions
   */
@@ -292,6 +298,23 @@ function Edit(_ref2) {
       slide_gap: newGap
     });
   };
+
+  const onChangeEffect = newEffect => {
+    var _Object$entries;
+
+    let newModule = null;
+    const newModuleModule = (_Object$entries = Object.entries(possibleEffects)) === null || _Object$entries === void 0 ? void 0 : _Object$entries.map(_ref5 => {
+      let [key, module] = _ref5;
+
+      if (key === newEffect) {
+        console.log(module);
+        return module;
+      }
+    }); // if( newModule ) {
+    //   setAttributes({ effect: newEffect });
+    //   setAttributes()
+    // }
+  };
   /**
    * UseEffects
   */
@@ -321,8 +344,8 @@ function Edit(_ref2) {
     onNumberOfItemsChange: onChangePostsPerPage,
     onOrderChange: onChangeOrder,
     onOrderByChange: onChangeOrderBy
-  }), taxonomiesTermsMap && ((_Object$entries = Object.entries(taxonomiesTermsMap)) === null || _Object$entries === void 0 ? void 0 : _Object$entries.map(_ref5 => {
-    let [key, value] = _ref5;
+  }), taxonomiesTermsMap && ((_Object$entries2 = Object.entries(taxonomiesTermsMap)) === null || _Object$entries2 === void 0 ? void 0 : _Object$entries2.map(_ref6 => {
+    let [key, value] = _ref6;
     const termOptions = value === null || value === void 0 ? void 0 : value.map(term => {
       return term.name;
     });
@@ -377,12 +400,25 @@ function Edit(_ref2) {
     help: scrollbar ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Scrollbar", "cth") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("No Scrollbar", "cth"),
     checked: scrollbar,
     onChange: onChangeScrollbar
-  })))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.useBlockProps)(), !posts && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
+  })), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.SelectControl, {
+    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)("Change Effect", "cth"),
+    value: effect,
+    onChange: onChangeEffect,
+    options: [{
+      label: "Slide",
+      value: "slide"
+    }, {
+      label: "Fade",
+      value: "fade",
+      module: swiper__WEBPACK_IMPORTED_MODULE_10__.EffectFade
+    }],
+    __nextHasNoMarginBottom: true
+  }))), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_3__.useBlockProps)(), !posts && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
     className: "posts-loading"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Spinner, null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("p", null, "Loading...")), posts && lodash_isEmpty__WEBPACK_IMPORTED_MODULE_6___default()(posts) && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
     class: "no-results"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("h2", null, "No Results")), posts && !lodash_isEmpty__WEBPACK_IMPORTED_MODULE_6___default()(posts) && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_11__.Swiper, {
-    modules: [swiper__WEBPACK_IMPORTED_MODULE_10__.A11y, swiper__WEBPACK_IMPORTED_MODULE_10__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_10__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_10__.Scrollbar, swiper__WEBPACK_IMPORTED_MODULE_10__.Keyboard],
+    modules: [swiper__WEBPACK_IMPORTED_MODULE_10__.A11y, swiper__WEBPACK_IMPORTED_MODULE_10__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_10__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_10__.Scrollbar, swiper__WEBPACK_IMPORTED_MODULE_10__.Keyboard, swiper__WEBPACK_IMPORTED_MODULE_10__.EffectFade],
     slidesPerView: slides_per_view,
     navigation: navigation ? {
       clickable: true
@@ -396,7 +432,17 @@ function Edit(_ref2) {
     loop: loop,
     spaceBetween: slide_gap,
     autoHeight: true,
-    keyboard: true
+    keyboard: true,
+    effect: "fade",
+    fadeEffect: {
+      crossFade: true
+    }
+    /**
+     * Don't allow swiping/dragging in editor
+     * so editing post template is easier
+    */
+    ,
+    allowTouchMove: false
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
     class: "swiper-wrapper"
   }, blockContexts && blockContexts.map(blockContext => {
@@ -16485,7 +16531,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"query":{"type":"object","default":{"perPage":1,"pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":false,"taxRelation":false,"_embed":true,"taxQuery":null,"status":"publish"}},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false},"slide_gap":{"type":"number","default":0}}}');
+module.exports = JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":2,"name":"cth-blocks/cth-post-carousel","version":"0.1.0","title":"Posts Carousel","category":"design","icon":"leftright","description":"Dynamic Posts Carousel","supports":{"html":false,"align":["wide","full"]},"textdomain":"cth-post-carousel","editorScript":"file:./index.js","viewScript":"file:./swiper.js","editorStyle":"file:./index.css","style":"file:./style-index.css","attributes":{"blockID":{"type":"string","default":"0"},"query":{"type":"object","default":{"perPage":1,"pages":1,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":false,"taxRelation":false,"_embed":true,"taxQuery":null,"status":"publish"}},"slides_per_view":{"type":"number","default":1},"navigation":{"type":"boolean","default":true},"loop":{"type":"boolean","default":false},"dots":{"type":"boolean","default":false},"scrollbar":{"type":"boolean","default":false},"slide_gap":{"type":"number","default":0},"effect":{"type":"string","default":"slide"}}}');
 
 /***/ })
 
