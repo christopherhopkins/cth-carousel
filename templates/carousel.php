@@ -22,13 +22,15 @@ function render_cth_carousel_block_template( $attributes, $content, $block ) {
     foreach($tax_queries as $key => $tax_query) {
       $taxonomy_slug = $key;
       $taxonomy_terms_ids = $tax_query;
-      $args["tax_query"][] = array(
-        "taxonomy" => $taxonomy_slug,
-        "field" => "term_id",
-        "terms" => $taxonomy_terms_ids,
-        "include_children" => false,
-        "operator" => "IN"
-      );
+      if( !empty($taxonomy_terms_ids) ) {
+        $args["tax_query"][] = array(
+          "taxonomy" => $taxonomy_slug,
+          "field" => "term_id",
+          "terms" => $taxonomy_terms_ids,
+          "include_children" => false,
+          "operator" => "IN"
+        );
+      }
     }
   }
 

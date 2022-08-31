@@ -21,7 +21,8 @@ import {
   useEffect,
   memo,
   useMemo,
-  useState
+  useState,
+  useRef
 } from "@wordpress/element";
 import isEmpty from "lodash/isEmpty";
 import _uniqueId from "lodash/uniqueId";
@@ -152,6 +153,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     "fade": EffectFade,
     "slide": null
   };
+  const ref = useRef();
   /**
    * On Change Functions
   */
@@ -207,6 +209,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
     if( number === 1 ) {
       setAttributes( { slide_gap: 0 } ); // no gap if only showing 1 slide
     }
+    ref?.current.swiper.update();
   }
   const onChangeLoop = () => {
     setAttributes( { loop: !loop } );
@@ -400,6 +403,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
         {posts && !isEmpty(posts) &&
           <>
             <Swiper
+              ref={ref}
               modules={[A11y, Navigation, Pagination, Scrollbar, Keyboard, EffectFade]}
               slidesPerView={slides_per_view}
               navigation={navigation ? { clickable: true } : navigation}
@@ -409,7 +413,7 @@ export default function Edit({ attributes, setAttributes, clientId }) {
               spaceBetween={slide_gap}
               autoHeight={true}
               keyboard={true}
-              effect="fade"
+              effect="slide"
               fadeEffect={{crossFade: true}}
               /**
                * Don't allow swiping/dragging in editor

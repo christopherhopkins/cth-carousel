@@ -180,6 +180,7 @@ function Edit(_ref2) {
     "fade": swiper__WEBPACK_IMPORTED_MODULE_10__.EffectFade,
     "slide": null
   };
+  const ref = (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.useRef)();
   /**
    * On Change Functions
   */
@@ -267,6 +268,8 @@ function Edit(_ref2) {
         slide_gap: 0
       }); // no gap if only showing 1 slide
     }
+
+    ref === null || ref === void 0 ? void 0 : ref.current.swiper.update();
   };
 
   const onChangeLoop = () => {
@@ -418,6 +421,7 @@ function Edit(_ref2) {
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Spinner, null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("p", null, "Loading...")), posts && lodash_isEmpty__WEBPACK_IMPORTED_MODULE_6___default()(posts) && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("div", {
     class: "no-results"
   }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)("h2", null, "No Results")), posts && !lodash_isEmpty__WEBPACK_IMPORTED_MODULE_6___default()(posts) && (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_1__.createElement)(swiper_react__WEBPACK_IMPORTED_MODULE_11__.Swiper, {
+    ref: ref,
     modules: [swiper__WEBPACK_IMPORTED_MODULE_10__.A11y, swiper__WEBPACK_IMPORTED_MODULE_10__.Navigation, swiper__WEBPACK_IMPORTED_MODULE_10__.Pagination, swiper__WEBPACK_IMPORTED_MODULE_10__.Scrollbar, swiper__WEBPACK_IMPORTED_MODULE_10__.Keyboard, swiper__WEBPACK_IMPORTED_MODULE_10__.EffectFade],
     slidesPerView: slides_per_view,
     navigation: navigation ? {
@@ -433,7 +437,7 @@ function Edit(_ref2) {
     spaceBetween: slide_gap,
     autoHeight: true,
     keyboard: true,
-    effect: "fade",
+    effect: "slide",
     fadeEffect: {
       crossFade: true
     }
